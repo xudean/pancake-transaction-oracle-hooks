@@ -4,3 +4,6 @@
 [submodule "lib/pancake-v4-universal-router"]
 	path = lib/pancake-v4-universal-router
 	url = https://github.com/pancakeswap/pancake-v4-universal-router
+[submodule "lib/bas-contract"]
+	path = lib/bas-contract
+	url = https://github.com/bnb-attestation-service/bas-contract.git
