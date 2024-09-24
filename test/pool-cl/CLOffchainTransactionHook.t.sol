@@ -37,10 +37,10 @@ contract CLOffchainTransactionHookTest is Test, CLTestUtils {
         ISchemaRegistry sr = ISchemaRegistry(address(this));
 
         MockEAS eas = new MockEAS(sr);
-        console.log("EAS_ADDRESS=%s", address(eas));
+        console.log("EAS=%s", address(eas));
 
         MockEASProxy easproxy = new MockEASProxy();
-        console.log("EASPROXY_ADDRESS=%s", address(easproxy));
+        console.log("EASPROXY=%s", address(easproxy));
 
         return (eas, easproxy);
     }
