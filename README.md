@@ -31,3 +31,9 @@ cd pancake-offchaindata-hooks
 forge install
 forge build
 ```
+
+## Off-chain Transaction Hook
+
+The [Off-chain Transaction Hook](./src/pool-cl/CLOffchainTransactionHook.sol) implements the `beforeAddLiquidity` and `beforeSwap` hooks.
+
+![Off-chain Transaction Hook Contract](./docs/class/CLOffchainTransactionHook.svg)
