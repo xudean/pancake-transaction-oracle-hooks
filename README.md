@@ -8,12 +8,7 @@ In this demo, transaction proofs can be submitted from the PADO extension or uti
 
 To be more technique-specific, for the on-chain transaction proof, [Brevis'](https://docs.brevis.network/) SDK is used in this demo to verify whether the user has had transactions on the BNB Chain since July 2024. For off-chain transaction proof, [PADO's](https://padolabs.org) MPC-TLS and IZK techniques are used to verify whether the user’s 30-day spot transaction volume on CEX platforms, such as Binance or OKX, exceeds $500 or a specific amount, depending on the application’s requirements.
 
-![image](https://hackmd.io/_uploads/BJDoNmdk6.png)
-
-Besides the demo, PADO is using MPC-TLS protocol to support:
-1. connecting with arbitrary data sources from TLS transmission, and proving the data authenticity;
-2. general-purpose data computation with zkSNARKs;
-3. high performance on any end-to-end process.
+![image](./docs/pics/process.jpeg)
 
 
 ## Prerequisite
