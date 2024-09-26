@@ -1,20 +1,19 @@
-# pancake-offchaindata-hooks
+# pancake-transaction-oracle-hooks
 
 ## Overview
 
-This repo creates a simple demo on a compliant DEX pool, using off-chain data attestations and the Hook feature in PancakeUniswap v4. We emphasise this repo is a prototype only, please don't use it in any product environment. 
+This repo creates a simple demo for DEX exclusive-access pools and better filters qualified users by combining off-chain and on-chain transaction data verification. This combination provides a more accurate representation of user transaction activities in a privacy-preserving way, giving applications more flexible filtering criteria. In the PancakeSwap case, a suitable exclusive-access condition could be if a user has a 30-day spot transaction volume exceeding $500 on a CEX platform and has made an on-chain transaction on the BNB Chain, making this user a target user for DEX.
 
-Off-chain data attestations are privacy-preserving data proofs created by end users, through the [PADO](https://padolabs.org) protocol. PADO is a cryptographic attestation protocol to bring all Internet data into smart contracts.
+In this demo, transaction proofs can be submitted from the PADO extension or utilized by PADO's MPC-TLS SDK to attest the user's on-chain and off-chain transactions. Throughout the entire process, the user’s privacy is fully protected. Whether the user meets the exclusive-access demands could be verified by this hook contract. 
 
-The demo implements the following [proposal](https://hackmd.io/QXi9YUvUSwmqxCuGl7Z9XA), where users with submitted proofs-of-KYC-status can be privileged to swap tokens on DEX. This enables new scenarios like institutional swaps.
+To be more technique-specific, for the on-chain transaction proof, [Brevis'](https://docs.brevis.network/) SDK is used in this demo to verify whether the user has had transactions on the BNB Chain since July 2024. For off-chain transaction proof, [PADO's](https://padolabs.org) MPC-TLS and IZK techniques are used to verify whether the user’s 30-day spot transaction volume on CEX platforms, such as Binance or OKX, exceeds $500 or a specific amount, depending on the application’s requirements.
 
 ![image](https://hackmd.io/_uploads/BJDoNmdk6.png)
 
-
-Besides the demo, PADO is an attestation protocol to support:
+Besides the demo, PADO is using MPC-TLS protocol to support:
 1. connecting with arbitrary data sources from TLS transmission, and proving the data authenticity;
 2. general-purpose data computation with zkSNARKs;
-3. high performance on any end-to-end process; 
+3. high performance on any end-to-end process.
 
 
 ## Prerequisite
