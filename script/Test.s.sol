@@ -74,7 +74,7 @@ contract TestInitializeScript is TestBase {
 }
 contract TestAddLiquidityScript is TestBase {
     function _test() public override {
-        addLiquidity(key, 10 ether, 10 ether, -60, 60, msg.sender);
+        addLiquidity(key, 1 ether, 1 ether, -60, 60, msg.sender);
     }
 }
 contract TestSwapScript is TestBase {

@@ -45,8 +45,8 @@ contract DeployTokenScript is Script {
 
         MockERC20 token0 = new MockERC20("token0", "T0", 18);
         MockERC20 token1 = new MockERC20("token1", "T1", 18);
-        token0.mint(msg.sender, 12345 ether);
-        token1.mint(msg.sender, 12345 ether);
+        token0.mint(msg.sender, 10000000000 ether);
+        token1.mint(msg.sender, 10000000000 ether);
 
         // approve permit2 contract to transfer our funds
         token0.approve(address(permit2), type(uint256).max);
