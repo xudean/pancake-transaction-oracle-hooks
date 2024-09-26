@@ -48,3 +48,71 @@ The [Off-chain Transaction Hook](./src/pool-cl/CLOffchainTransactionHook.sol) im
    - Pancake Swap ([Vault](https://testnet.bscscan.com/address/0x08F012b8E2f3021db8bd2A896A7F422F4041F131), [CLPoolManager](https://testnet.bscscan.com/address/0x969D90aC74A1a5228b66440f8C8326a8dA47A5F9), [CLPositionManager](https://testnet.bscscan.com/address/0x89A7D45D007077485CB5aE2abFB740b1fe4FF574), [UniversalRouter](https://testnet.bscscan.com/address/0x30067B296Edf5BEbB1CB7b593898794DDF6ab7c5)). 
    - The arguments of Hook ([EAS](https://testnet.bscscan.com/address/0x6c2270298b1e6046898a322acB3Cbad6F99f7CBD), [EASProxy](https://testnet.bscscan.com/address/0x620e84546d71A775A82491e1e527292e94a7165A), [SchemaBytes](https://testnet.bascan.io/schema/0x5f868b117fd34565f3626396ba91ef0c9a607a0e406972655c5137c6d4291af9)).
 
+
+### Deployment
+
+
+- Deploy Token
+
+
+```sh
+source .env
+forge script script/DeployToken.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+```
+
+output (sample):
+
+```log
+TOKEN0=0x772F5b156EDaa4874F3f4F81c5e4479EE7E1669B
+TOKEN1=0x7AA33Aa23aB75D37A9c27B0ba51bb10ed6e41a51
+```
+
+Add/replace the above address in `.env`.
+
+<br/>
+
+- Deploy Hook
+
+```sh
+source .env
+forge script script/DeployHook.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+```
+
+output (sample):
+
+```log
+HOOK=0x74a47bc6916676443Db1d9dd14b25d451Bfb27A3
+```
+
+Add/replace the above address in `.env`.
+
+
+### Testing
+
+
+- Test Initialize
+
+```sh
+source .env
+forge script script/Test.s.sol:TestInitializeScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+```
+
+This command only needs to be executed once.
+
+<br/>
+
+- Test AddLiquidity
+
+```sh
+source .env
+forge script script/Test.s.sol:TestAddLiquidityScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+```
+
+<br/>
+
+- Test Swap
+
+```sh
+source .env
+forge script script/Test.s.sol:TestSwapScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+```
