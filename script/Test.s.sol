@@ -6,10 +6,10 @@ import {Currency} from "pancake-v4-core/src/types/Currency.sol";
 import {CLPoolManager} from "pancake-v4-core/src/pool-cl/CLPoolManager.sol";
 import {CLPositionManager} from "pancake-v4-periphery/src/pool-cl/CLPositionManager.sol";
 import {UniversalRouter} from "pancake-v4-universal-router/src/UniversalRouter.sol";
+import {Constants} from "pancake-v4-core/test/pool-cl/helpers/Constants.sol";
 import {PoolKey} from "pancake-v4-core/src/types/PoolKey.sol";
 import {PoolIdLibrary} from "pancake-v4-core/src/types/PoolId.sol";
 import {IHooks} from "pancake-v4-core/src/interfaces/IHooks.sol";
-import {CLOffchainTransactionHook} from "../../src/pool-cl/CLOffchainTransactionHook.sol";
 import {ICLRouterBase} from "pancake-v4-periphery/src/pool-cl/interfaces/ICLRouterBase.sol";
 
 import {CLUtils} from "./utils/CLUtils.sol";
@@ -67,19 +67,24 @@ contract TestBase is Script, CLUtils {
     function _test() public virtual {}
 }
 
+contract TestInitializeScript is TestBase {
+    function _test() public override {
+        poolManager.initialize(key, Constants.SQRT_RATIO_1_1, new bytes(0));
+    }
+}
 contract TestAddLiquidityScript is TestBase {
     function _test() public override {
-        addLiquidity(key, 1 ether, 1 ether, -60, 60, msg.sender);
+        addLiquidity(key, 10 ether, 10 ether, -60, 60, msg.sender);
     }
 }
 contract TestSwapScript is TestBase {
     function _test() public override {
-        MockERC20(Currency.unwrap(currency0)).mint(msg.sender, 0.1 ether);
+        MockERC20(Currency.unwrap(currency0)).mint(msg.sender, 0.01 ether);
         exactInputSingle(
             ICLRouterBase.CLSwapExactInputSingleParams({
                 poolKey: key,
                 zeroForOne: true,
-                amountIn: 0.1 ether,
+                amountIn: 0.01 ether,
                 amountOutMinimum: 0,
                 sqrtPriceLimitX96: 0,
                 hookData: new bytes(0)
@@ -87,8 +92,10 @@ contract TestSwapScript is TestBase {
         );
     }
 }
+
 /*
 source .env
+forge script script/Test.s.sol:TestInitializeScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
 forge script script/Test.s.sol:TestAddLiquidityScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
 forge script script/Test.s.sol:TestSwapScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
 */

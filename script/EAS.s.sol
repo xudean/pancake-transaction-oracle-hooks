@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.24;
 
-import {MockEAS} from "../../mocks/MockEAS.sol";
-import {MockEASProxy} from "../../mocks/MockEASProxy.sol";
+import {MockEAS} from "../mocks/MockEAS.sol";
+import {MockEASProxy} from "../mocks/MockEASProxy.sol";
 import {ISchemaRegistry} from "bas-contract/contracts/ISchemaRegistry.sol";
 
 import {console} from "forge-std/console.sol";
@@ -15,10 +15,16 @@ contract EASScript is Script {
 
         uint256 privateKey = vm.envUint("PRIVATE_KEY");
         address signerAddr = vm.addr(privateKey);
-        console.log("SIGNER%s", signerAddr);
+        console.log("SIGNER=%s", signerAddr);
 
         vm.startBroadcast(privateKey);
 
+        _deploy();
+
+        vm.stopBroadcast();
+    }
+
+    function _deploy() internal {
         // It's just a test. It doesn't matter.
         ISchemaRegistry sr = ISchemaRegistry(address(this));
 
@@ -27,13 +33,9 @@ contract EASScript is Script {
 
         MockEASProxy easproxy = new MockEASProxy();
         console.log("EASPROXY=%s", address(easproxy));
-
-        vm.stopBroadcast();
     }
 }
 /*
 source .env
-forge script script/EAS.s.sol \
-  --rpc-url $RPC_URL --private-key $PRIVATE_KEY \
-  --broadcast
+forge script script/EAS.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
 */
