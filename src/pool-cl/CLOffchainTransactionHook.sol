@@ -2,9 +2,8 @@
 pragma solidity ^0.8.24;
 
 import {PoolKey} from "pancake-v4-core/src/types/PoolKey.sol";
-import {BalanceDelta, BalanceDeltaLibrary} from "pancake-v4-core/src/types/BalanceDelta.sol";
 import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "pancake-v4-core/src/types/BeforeSwapDelta.sol";
-import {PoolId, PoolIdLibrary} from "pancake-v4-core/src/types/PoolId.sol";
+import {PoolIdLibrary} from "pancake-v4-core/src/types/PoolId.sol";
 import {ICLPoolManager} from "pancake-v4-core/src/pool-cl/interfaces/ICLPoolManager.sol";
 import {CLBaseHook} from "./CLBaseHook.sol";
 
@@ -13,30 +12,33 @@ import {IEAS} from "bas-contract/contracts/IEAS.sol";
 import {Attestation, EMPTY_UID, uncheckedInc} from "bas-contract/contracts/Common.sol";
 import {IEASProxy} from "../IEASProxy.sol";
 
-/// @notice CLOffchainTransactionHook will check the spot trading volume
-/// of binance or other exchanges within 30 days before adding liquidity or swap.
+/// @notice CLOffchainTransactionHook will check the following attestations before adding liquidity or swap:
+/// 1. the spot trading volume of binance or other exchanges within 30 days
+/// 2. whether has transaction(s) on BNB chain since 2024 July
 contract CLOffchainTransactionHook is CLBaseHook, Ownable {
     using PoolIdLibrary for PoolKey;
 
+    error NotEnoughAttestations();
     error NOSpot30dTradeVol();
+    error NOTransactionsOnBnbChain();
 
     event BeforeAddLiquidity(address indexed sender);
     event BeforeSwap(address indexed sender);
 
     IEASProxy private _iEasProxy;
     IEAS private _eas;
-    bytes32 private _schemaSpot30dTradeVol;
+    bytes32 private _schemaBytes;
     uint private _baseValue;
 
     constructor(
         ICLPoolManager _poolManager,
         IEASProxy iEasPrxoy,
         IEAS eas,
-        bytes32 schemaSpot30dTradeVol
+        bytes32 schemaBytes
     ) CLBaseHook(_poolManager) Ownable(msg.sender) {
         _iEasProxy = iEasPrxoy;
         _eas = eas;
-        _schemaSpot30dTradeVol = schemaSpot30dTradeVol;
+        _schemaBytes = schemaBytes;
         _baseValue = 100; // default 100
     }
 
@@ -73,10 +75,9 @@ contract CLOffchainTransactionHook is CLBaseHook, Ownable {
         ICLPoolManager.ModifyLiquidityParams calldata,
         bytes calldata
     ) external override poolManagerOnly returns (bytes4) {
-        if (!_checkSpot30dTradeVolResult(tx.origin)) {
-            revert NOSpot30dTradeVol();
-        }
+        _checkAttestations(tx.origin);
         emit BeforeAddLiquidity(sender);
+
         return this.beforeAddLiquidity.selector;
     }
 
@@ -91,30 +92,26 @@ contract CLOffchainTransactionHook is CLBaseHook, Ownable {
         poolManagerOnly
         returns (bytes4, BeforeSwapDelta, uint24)
     {
-        if (!_checkSpot30dTradeVolResult(tx.origin)) {
-            revert NOSpot30dTradeVol();
-        }
+        _checkAttestations(tx.origin);
         emit BeforeSwap(sender);
 
         return (this.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, 0);
     }
 
-    function _checkSpot30dTradeVolResult(
-        address sender
-    ) internal view returns (bool) {
+    function _checkAttestations(address sender) internal {
         bytes32[] memory uids = _iEasProxy.getPadoAttestations(
             sender,
-            _schemaSpot30dTradeVol
+            _schemaBytes
         );
         if (uids.length < 2) {
-            return false;
+            revert NotEnoughAttestations();
         }
 
-        bool _spot30DayTradeVol = false;
+        bool _spot30dTradeVol = false;
         bool _hasTransactionOnBnbChain = false;
         for (uint256 i = 0; i < uids.length; i = uncheckedInc(i)) {
-            if (_spot30DayTradeVol && _hasTransactionOnBnbChain) {
-                return true;
+            if (_spot30dTradeVol && _hasTransactionOnBnbChain) {
+                break;
             }
 
             Attestation memory ats = _eas.getAttestation(uids[i]);
@@ -131,7 +128,7 @@ contract CLOffchainTransactionHook is CLBaseHook, Ownable {
             ) = abi.decode(ats.data, (string, string, string, string, bytes32, bool, uint64, bytes32));
 
             if (
-                !_spot30DayTradeVol &&
+                !_spot30dTradeVol &&
                 _compareStrings(ProofType, "Assets") &&
                 (_compareStrings(Source, "binance") ||
                     _compareStrings(Source, "okx")) &&
@@ -139,7 +136,7 @@ contract CLOffchainTransactionHook is CLBaseHook, Ownable {
                 _compareCondition(Condition, _baseValue) &&
                 Result
             ) {
-                _spot30DayTradeVol = true;
+                _spot30dTradeVol = true;
             } else if (
                 !_hasTransactionOnBnbChain &&
                 _compareStrings(ProofType, "Web3 Wallet") &&
@@ -152,7 +149,11 @@ contract CLOffchainTransactionHook is CLBaseHook, Ownable {
             }
         }
 
-        return _spot30DayTradeVol && _hasTransactionOnBnbChain;
+        if (!_spot30dTradeVol) {
+            revert NOSpot30dTradeVol();
+        } else if (!_hasTransactionOnBnbChain) {
+            revert NOTransactionsOnBnbChain();
+        }
     }
 
     /**
@@ -211,10 +212,8 @@ contract CLOffchainTransactionHook is CLBaseHook, Ownable {
     function setEasProxy(IEASProxy iEasPrxoy) external onlyOwner {
         _iEasProxy = iEasPrxoy;
     }
-    function setSchemaSpot30dTradeVol(
-        bytes32 schemaSpot30dTradeVol
-    ) external onlyOwner {
-        _schemaSpot30dTradeVol = schemaSpot30dTradeVol;
+    function setSchemaBytes(bytes32 schemaBytes) external onlyOwner {
+        _schemaBytes = schemaBytes;
     }
     function setBaseValue(uint baseValue) external onlyOwner {
         _baseValue = baseValue;
@@ -223,8 +222,8 @@ contract CLOffchainTransactionHook is CLBaseHook, Ownable {
     function getEasProxy() external view returns (IEASProxy) {
         return _iEasProxy;
     }
-    function getSchemaSpot30dTradeVol() external view returns (bytes32) {
-        return _schemaSpot30dTradeVol;
+    function getSchemaBytes() external view returns (bytes32) {
+        return _schemaBytes;
     }
     function getBaseValue() external view returns (uint) {
         return _baseValue;

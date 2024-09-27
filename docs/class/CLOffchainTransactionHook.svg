@@ -23,15 +23,15 @@
 <text text-anchor="start" x="8" y="-193.5" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;beforeAddLiquidity(sender: address, key: PoolKey, ICLPoolManager.ModifyLiquidityParams, bytes): bytes4 &lt;&lt;poolManagerOnly&gt;&gt;</text>
 <text text-anchor="start" x="8" y="-176.7" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;beforeSwap(sender: address, key: PoolKey, ICLPoolManager.SwapParams, bytes): (bytes4, BeforeSwapDelta, uint24) &lt;&lt;poolManagerOnly&gt;&gt;</text>
 <text text-anchor="start" x="8" y="-159.9" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;setEasProxy(iEasPrxoy: IEASProxy) &lt;&lt;onlyOwner&gt;&gt;</text>
-<text text-anchor="start" x="8" y="-143.1" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;setSchemaSpot30dTradeVol(schemaSpot30dTradeVol: bytes32) &lt;&lt;onlyOwner&gt;&gt;</text>
+<text text-anchor="start" x="8" y="-143.1" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;setSchemaBytes(schemaBytes: bytes32) &lt;&lt;onlyOwner&gt;&gt;</text>
 <text text-anchor="start" x="8" y="-126.3" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;setBaseValue(baseValue: uint) &lt;&lt;onlyOwner&gt;&gt;</text>
 <text text-anchor="start" x="8" y="-109.5" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;getEasProxy(): IEASProxy</text>
-<text text-anchor="start" x="8" y="-92.7" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;getSchemaSpot30dTradeVol(): bytes32</text>
+<text text-anchor="start" x="8" y="-92.7" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;getSchemaBytes(): bytes32</text>
 <text text-anchor="start" x="8" y="-75.9" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;getBaseValue(): uint</text>
 <text text-anchor="start" x="8" y="-59.1" font-family="Times,serif" font-size="14.00">Public:</text>
 <text text-anchor="start" x="8" y="-42.3" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;&lt;&lt;event&gt;&gt; BeforeAddLiquidity(sender: address)</text>
 <text text-anchor="start" x="8" y="-25.5" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;&lt;&lt;event&gt;&gt; BeforeSwap(sender: address)</text>
-<text text-anchor="start" x="8" y="-8.7" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;constructor(_poolManager: ICLPoolManager, iEasPrxoy: IEASProxy, eas: IEAS, schemaSpot30dTradeVol: bytes32)</text>
+<text text-anchor="start" x="8" y="-8.7" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;constructor(_poolManager: ICLPoolManager, iEasPrxoy: IEASProxy, eas: IEAS, schemaBytes: bytes32)</text>
 </g>
 </g>
 </svg>
