@@ -12,10 +12,10 @@ import {IEAS} from "bas-contract/contracts/IEAS.sol";
 import {Attestation, EMPTY_UID, uncheckedInc} from "bas-contract/contracts/Common.sol";
 import {IEASProxy} from "../IEASProxy.sol";
 
-/// @notice CLOffchainTransactionHook will check the following attestations before adding liquidity or swap:
+/// @notice CLTransactionOracleHook will check the following attestations before adding liquidity or swap:
 /// 1. the spot trading volume of binance or other exchanges within 30 days
 /// 2. whether has transaction(s) on BNB chain since 2024 July
-contract CLOffchainTransactionHook is CLBaseHook, Ownable {
+contract CLTransactionOracleHook is CLBaseHook, Ownable {
     using PoolIdLibrary for PoolKey;
 
     error NotEnoughAttestations();

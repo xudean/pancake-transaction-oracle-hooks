@@ -22,17 +22,17 @@ Install foundry, see https://book.getfoundry.sh/getting-started/installation.
 Get the repo:
 
 ```sh
-git clone --recursive https://github.com/pado-labs/pancake-offchaindata-hooks.git
-cd pancake-offchaindata-hooks
+git clone --recursive https://github.com/pado-labs/pancake-transaction-oracle-hooks.git
+cd pancake-transaction-oracle-hooks
 forge install
 forge build
 ```
 
-## Off-chain Transaction Hook
+## Transaction Oracle Hooks
 
-The [Off-chain Transaction Hook](./src/pool-cl/CLOffchainTransactionHook.sol) implements the `beforeAddLiquidity` and `beforeSwap` hooks.
+The [Transaction Oracle Hooks](./src/pool-cl/CLTransactionOracleHook.sol) implements the `beforeAddLiquidity` and `beforeSwap` hooks.
 
-![Off-chain Transaction Hook Contract](./docs/class/CLOffchainTransactionHook.svg)
+![Transaction Oracle Hooks Contract](./docs/class/CLTransactionOracleHook.svg)
 
 
 ## BSC-Testnet

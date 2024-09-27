@@ -20,13 +20,13 @@ import {ISchemaRegistry} from "bas-contract/contracts/ISchemaRegistry.sol";
 import {IEAS} from "bas-contract/contracts/IEAS.sol";
 import {IEASProxy} from "../../src/IEASProxy.sol";
 
-import {CLOffchainTransactionHook} from "../../src/pool-cl/CLOffchainTransactionHook.sol";
+import {CLTransactionOracleHook} from "../../src/pool-cl/CLTransactionOracleHook.sol";
 
 contract CLOffchainTransactionHookTest is Test, CLTestUtils {
     using PoolIdLibrary for PoolKey;
     using CLPoolParametersHelper for bytes32;
 
-    CLOffchainTransactionHook hook;
+    CLTransactionOracleHook hook;
     Currency currency0;
     Currency currency1;
     PoolKey key;
@@ -50,7 +50,7 @@ contract CLOffchainTransactionHookTest is Test, CLTestUtils {
         (currency0, currency1) = deployContractsWithTokens();
         (IEAS eas, IEASProxy easproxy) = deployEAS();
         bytes32 schemaSpot30dTradeVol = 0x5f868b117fd34565f3626396ba91ef0c9a607a0e406972655c5137c6d4291af9;
-        hook = new CLOffchainTransactionHook(
+        hook = new CLTransactionOracleHook(
             poolManager,
             easproxy,
             eas,

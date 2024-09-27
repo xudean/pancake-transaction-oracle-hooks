@@ -5,7 +5,7 @@ import {CLPoolManager} from "pancake-v4-core/src/pool-cl/CLPoolManager.sol";
 
 import {IEAS} from "bas-contract/contracts/IEAS.sol";
 import {IEASProxy} from "../src/IEASProxy.sol";
-import {CLOffchainTransactionHook} from "../src/pool-cl/CLOffchainTransactionHook.sol";
+import {CLTransactionOracleHook} from "../src/pool-cl/CLTransactionOracleHook.sol";
 
 import {console} from "forge-std/console.sol";
 import "forge-std/Script.sol";
@@ -39,7 +39,7 @@ contract DeployHookScript is Script {
         IEAS eas = IEAS(_eas);
         IEASProxy easproxy = IEASProxy(_easproxy);
         CLPoolManager poolManager = CLPoolManager(_poolManager);
-        CLOffchainTransactionHook hook = new CLOffchainTransactionHook(
+        CLTransactionOracleHook hook = new CLTransactionOracleHook(
             poolManager,
             easproxy,
             eas,
