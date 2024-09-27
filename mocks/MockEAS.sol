@@ -161,27 +161,44 @@ contract MockEAS is IEAS {
      * @inheritdoc IEAS
      */
     function getAttestation(
-        bytes32 /*uid*/
+        bytes32 uid
     ) external pure returns (Attestation memory) {
         // fakes an attestation
         address addr;
         bytes32 b32 = 0x5569a35483840767334b19c6f28d1347dad8ec4521859a1742d2175898489752;
+        Attestation memory attestation;
 
-        // string ProofType,string Source,string Content,string Condition,bytes32 SourceUserIdHash,bool Result,uint64 Timestamp,bytes32 UserIdHash
         // prettier-ignore
-        bytes memory dummy_data = abi.encode("Assets", "okx", "Spot 30-Day Trade Volume", ">100", b32, true, 0, b32);
-        Attestation memory attestation = Attestation({
-            uid: b32,
-            schema: b32,
-            refUID: b32,
-            time: 0,
-            expirationTime: 0,
-            revocationTime: 0,
-            recipient: addr,
-            attester: addr,
-            revocable: false,
-            data: dummy_data
-        });
+        if (uid == 0x0000000000000000000000000000000000000000000000000000000000000001){
+            // string ProofType,string Source,string Content,string Condition,bytes32 SourceUserIdHash,bool Result,uint64 Timestamp,bytes32 UserIdHash
+            bytes memory dummy_data = abi.encode("Assets", "okx", "Spot 30-Day Trade Volume", ">100", b32, true, 0, b32);
+            attestation = Attestation({
+                uid: b32,
+                schema: b32,
+                refUID: b32,
+                time: 0,
+                expirationTime: 0,
+                revocationTime: 0,
+                recipient: addr,
+                attester: addr,
+                revocable: false,
+                data: dummy_data
+            });
+        }else{
+            bytes memory dummy_data = abi.encode("Web3 Wallet", "Brevis", "Has transactions on BNB Chain", "since 2024 July", b32, true, 0, b32);
+            attestation = Attestation({
+                uid: b32,
+                schema: b32,
+                refUID: b32,
+                time: 0,
+                expirationTime: 0,
+                revocationTime: 0,
+                recipient: addr,
+                attester: addr,
+                revocable: false,
+                data: dummy_data
+            });
+        }
 
         return attestation;
     }

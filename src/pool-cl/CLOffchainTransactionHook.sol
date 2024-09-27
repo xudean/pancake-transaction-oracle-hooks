@@ -106,10 +106,19 @@ contract CLOffchainTransactionHook is CLBaseHook, Ownable {
             sender,
             _schemaSpot30dTradeVol
         );
+        if (uids.length < 2) {
+            return false;
+        }
 
-        // prettier-ignore
+        bool _spot30DayTradeVol = false;
+        bool _hasTransactionOnBnbChain = false;
         for (uint256 i = 0; i < uids.length; i = uncheckedInc(i)) {
+            if (_spot30DayTradeVol && _hasTransactionOnBnbChain) {
+                return true;
+            }
+
             Attestation memory ats = _eas.getAttestation(uids[i]);
+            // prettier-ignore
             (
                 string memory ProofType,
                 string memory Source,
@@ -120,17 +129,30 @@ contract CLOffchainTransactionHook is CLBaseHook, Ownable {
                 /*uint64 Timestamp*/,
                 /*bytes32 UserIdHash*/
             ) = abi.decode(ats.data, (string, string, string, string, bytes32, bool, uint64, bytes32));
+
             if (
+                !_spot30DayTradeVol &&
                 _compareStrings(ProofType, "Assets") &&
-                (_compareStrings(Source, "binance") || _compareStrings(Source, "okx")) &&
+                (_compareStrings(Source, "binance") ||
+                    _compareStrings(Source, "okx")) &&
                 _compareStrings(Content, "Spot 30-Day Trade Volume") &&
                 _compareCondition(Condition, _baseValue) &&
                 Result
             ) {
-                return true;
+                _spot30DayTradeVol = true;
+            } else if (
+                !_hasTransactionOnBnbChain &&
+                _compareStrings(ProofType, "Web3 Wallet") &&
+                _compareStrings(Source, "Brevis") &&
+                _compareStrings(Content, "Has transactions on BNB Chain") &&
+                _compareStrings(Condition, "since 2024 July") &&
+                Result
+            ) {
+                _hasTransactionOnBnbChain = true;
             }
         }
-        return false;
+
+        return _spot30DayTradeVol && _hasTransactionOnBnbChain;
     }
 
     /**
