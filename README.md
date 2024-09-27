@@ -77,7 +77,7 @@ forge script script/DeployHook.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_K
 output (sample):
 
 ```log
-HOOK=0x74a47bc6916676443Db1d9dd14b25d451Bfb27A3
+HOOK=0xd9Dd1FEaF845Dd036245A504317cCccE7Bc18f49
 ```
 
 Add/replace the above address in `.env`.
