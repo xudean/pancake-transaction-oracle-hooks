@@ -83,10 +83,9 @@ HOOK=0xd9Dd1FEaF845Dd036245A504317cCccE7Bc18f49
 Add/replace the above address in `.env`.
 
 
-### Testing
+### Before Testing
 
-
-- Test Initialize
+- Initialize Pool
 
 ```sh
 source .env
@@ -96,6 +95,30 @@ forge script script/Test.s.sol:TestInitializeScript --rpc-url $RPC_URL --private
 This command only needs to be executed once.
 
 <br/>
+
+- Transfer Token (Optional)
+
+Request some tokens from the Token owner. (If necessary)
+
+```sh
+source .env
+export RECEIVER=<the receiver address>
+# export RECEIVER=0x...
+forge script script/Transfer.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+```
+
+<br/>
+
+- Token Approve
+
+Before swap testing, need approve first.
+
+```sh
+source .env
+forge script script/Approve.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+```
+
+### Testing
 
 - Test AddLiquidity
 
