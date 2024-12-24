@@ -35,7 +35,7 @@ contract DeployTokenScript is Script {
         console.log("_token0=%s", _token0);
         address _token1 = vm.envAddress("TOKEN1");
         console.log("_token1=%s", _token1);
-        address _positionManager = vm.envAddress("CL_POSITION_MANAGER");
+        address payable _positionManager = payable(vm.envAddress("CL_POSITION_MANAGER"));
         console.log("_positionManager=%s", _positionManager);
         address _universalRouter = vm.envAddress("UNIVERSAL_ROUTER");
         console.log("_universalRouter=%s", _universalRouter);

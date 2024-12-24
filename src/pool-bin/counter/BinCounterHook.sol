@@ -6,7 +6,7 @@ import {BalanceDelta, BalanceDeltaLibrary} from "pancake-v4-core/src/types/Balan
 import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "pancake-v4-core/src/types/BeforeSwapDelta.sol";
 import {PoolId, PoolIdLibrary} from "pancake-v4-core/src/types/PoolId.sol";
 import {IBinPoolManager} from "pancake-v4-core/src/pool-bin/interfaces/IBinPoolManager.sol";
-import {BinBaseHook} from "./BinBaseHook.sol";
+import {BinBaseHook} from "../BinBaseHook.sol";
 
 /// @notice BinCounterHook is a contract that counts the number of times a hook is called
 /// @dev note the code is not production ready, it is only to share how a hook looks like

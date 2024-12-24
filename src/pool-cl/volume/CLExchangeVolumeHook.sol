@@ -5,17 +5,17 @@ import {PoolKey} from "pancake-v4-core/src/types/PoolKey.sol";
 import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "pancake-v4-core/src/types/BeforeSwapDelta.sol";
 import {PoolIdLibrary} from "pancake-v4-core/src/types/PoolId.sol";
 import {ICLPoolManager} from "pancake-v4-core/src/pool-cl/interfaces/ICLPoolManager.sol";
-import {CLBaseHook} from "./CLBaseHook.sol";
+import {CLBaseHook} from "../CLBaseHook.sol";
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IEAS} from "bas-contract/contracts/IEAS.sol";
 import {Attestation, EMPTY_UID, uncheckedInc} from "bas-contract/contracts/Common.sol";
-import {IEASProxy} from "../IEASProxy.sol";
+import {IEASProxy} from "../../IEASProxy.sol";
 
-/// @notice CLTransactionOracleHook will check the following attestations before adding liquidity or swap:
+/// @notice CLExchangeVolumeHook.sol.sol will check the following attestations before adding liquidity or swap:
 /// 1. the spot trading volume of binance or other exchanges within 30 days
 /// 2. whether has transaction(s) on BNB chain since 2024 July
-contract CLTransactionOracleHook is CLBaseHook, Ownable {
+contract CLExchangeVolumeHook is CLBaseHook, Ownable {
     using PoolIdLibrary for PoolKey;
 
     error NotEnoughAttestations();
@@ -99,61 +99,7 @@ contract CLTransactionOracleHook is CLBaseHook, Ownable {
     }
 
     function _checkAttestations(address sender) internal {
-        bytes32[] memory uids = _iEasProxy.getPadoAttestations(
-            sender,
-            _schemaBytes
-        );
-        if (uids.length < 2) {
-            revert NotEnoughAttestations();
-        }
 
-        bool _spot30dTradeVol = false;
-        bool _hasTransactionOnBnbChain = false;
-        for (uint256 i = 0; i < uids.length; i = uncheckedInc(i)) {
-            if (_spot30dTradeVol && _hasTransactionOnBnbChain) {
-                break;
-            }
-
-            Attestation memory ats = _eas.getAttestation(uids[i]);
-            // prettier-ignore
-            (
-                string memory ProofType,
-                string memory Source,
-                string memory Content,
-                string memory Condition,
-                /*bytes32 SourceUserIdHash*/,
-                bool Result,
-                /*uint64 Timestamp*/,
-                /*bytes32 UserIdHash*/
-            ) = abi.decode(ats.data, (string, string, string, string, bytes32, bool, uint64, bytes32));
-
-            if (
-                !_spot30dTradeVol &&
-                _compareStrings(ProofType, "Assets") &&
-                (_compareStrings(Source, "binance") ||
-                    _compareStrings(Source, "okx")) &&
-                _compareStrings(Content, "Spot 30-Day Trade Volume") &&
-                _compareCondition(Condition, _baseValue) &&
-                Result
-            ) {
-                _spot30dTradeVol = true;
-            } else if (
-                !_hasTransactionOnBnbChain &&
-                _compareStrings(ProofType, "Web3 Wallet") &&
-                _compareStrings(Source, "Brevis") &&
-                _compareStrings(Content, "Has transactions on BNB Chain") &&
-                _compareStrings(Condition, "since 2024 July") &&
-                Result
-            ) {
-                _hasTransactionOnBnbChain = true;
-            }
-        }
-
-        if (!_spot30dTradeVol) {
-            revert NOSpot30dTradeVol();
-        } else if (!_hasTransactionOnBnbChain) {
-            revert NOTransactionsOnBnbChain();
-        }
     }
 
     /**

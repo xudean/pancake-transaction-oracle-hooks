@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.19;
 
 import {
     HOOKS_BEFORE_INITIALIZE_OFFSET,
@@ -26,12 +26,24 @@ import {ICLHooks} from "pancake-v4-core/src/pool-cl/interfaces/ICLHooks.sol";
 import {ICLPoolManager} from "pancake-v4-core/src/pool-cl/interfaces/ICLPoolManager.sol";
 import {CLPoolManager} from "pancake-v4-core/src/pool-cl/CLPoolManager.sol";
 
+/// @notice BaseHook abstract contract for CL pool hooks to inherit
 abstract contract CLBaseHook is ICLHooks {
+    /// @notice The sender is not the pool manager
     error NotPoolManager();
+
+    /// @notice The sender is not the vault
     error NotVault();
+
+    /// @notice The sender is not this contract
     error NotSelf();
+
+    /// @notice The pool key does not include this hook
     error InvalidPool();
+
+    /// @notice The delegation of lockAcquired failed
     error LockFailure();
+
+    /// @notice The method is not implemented
     error HookNotImplemented();
 
     struct Permissions {
@@ -86,8 +98,7 @@ abstract contract CLBaseHook is ICLHooks {
         _;
     }
 
-    /// @dev Helper function when the hook needs to get a lock from the vault. See
-    ///      https://github.com/pancakeswap/pancake-v4-hooks oh hooks which perform vault.lock()
+    /// @dev Delegate calls to corresponding methods according to callback data
     function lockAcquired(bytes calldata data) external virtual vaultOnly returns (bytes memory) {
         (bool success, bytes memory returnData) = address(this).call(data);
         if (success) return returnData;
@@ -99,18 +110,17 @@ abstract contract CLBaseHook is ICLHooks {
         }
     }
 
-    function beforeInitialize(address, PoolKey calldata, uint160, bytes calldata) external virtual returns (bytes4) {
+    /// @inheritdoc ICLHooks
+    function beforeInitialize(address, PoolKey calldata, uint160) external virtual returns (bytes4) {
         revert HookNotImplemented();
     }
 
-    function afterInitialize(address, PoolKey calldata, uint160, int24, bytes calldata)
-        external
-        virtual
-        returns (bytes4)
-    {
+    /// @inheritdoc ICLHooks
+    function afterInitialize(address, PoolKey calldata, uint160, int24) external virtual returns (bytes4) {
         revert HookNotImplemented();
     }
 
+    /// @inheritdoc ICLHooks
     function beforeAddLiquidity(
         address,
         PoolKey calldata,
@@ -120,16 +130,19 @@ abstract contract CLBaseHook is ICLHooks {
         revert HookNotImplemented();
     }
 
+    /// @inheritdoc ICLHooks
     function afterAddLiquidity(
         address,
         PoolKey calldata,
         ICLPoolManager.ModifyLiquidityParams calldata,
+        BalanceDelta,
         BalanceDelta,
         bytes calldata
     ) external virtual returns (bytes4, BalanceDelta) {
         revert HookNotImplemented();
     }
 
+    /// @inheritdoc ICLHooks
     function beforeRemoveLiquidity(
         address,
         PoolKey calldata,
@@ -139,16 +152,19 @@ abstract contract CLBaseHook is ICLHooks {
         revert HookNotImplemented();
     }
 
+    /// @inheritdoc ICLHooks
     function afterRemoveLiquidity(
         address,
         PoolKey calldata,
         ICLPoolManager.ModifyLiquidityParams calldata,
+        BalanceDelta,
         BalanceDelta,
         bytes calldata
     ) external virtual returns (bytes4, BalanceDelta) {
         revert HookNotImplemented();
     }
 
+    /// @inheritdoc ICLHooks
     function beforeSwap(address, PoolKey calldata, ICLPoolManager.SwapParams calldata, bytes calldata)
         external
         virtual
@@ -157,6 +173,7 @@ abstract contract CLBaseHook is ICLHooks {
         revert HookNotImplemented();
     }
 
+    /// @inheritdoc ICLHooks
     function afterSwap(address, PoolKey calldata, ICLPoolManager.SwapParams calldata, BalanceDelta, bytes calldata)
         external
         virtual
@@ -165,6 +182,7 @@ abstract contract CLBaseHook is ICLHooks {
         revert HookNotImplemented();
     }
 
+    /// @inheritdoc ICLHooks
     function beforeDonate(address, PoolKey calldata, uint256, uint256, bytes calldata)
         external
         virtual
@@ -173,6 +191,7 @@ abstract contract CLBaseHook is ICLHooks {
         revert HookNotImplemented();
     }
 
+    /// @inheritdoc ICLHooks
     function afterDonate(address, PoolKey calldata, uint256, uint256, bytes calldata)
         external
         virtual
@@ -181,6 +200,7 @@ abstract contract CLBaseHook is ICLHooks {
         revert HookNotImplemented();
     }
 
+    /// @dev Helper function to construct the hook registration map
     function _hooksRegistrationBitmapFrom(Permissions memory permissions) internal pure returns (uint16) {
         return uint16(
             (permissions.beforeInitialize ? 1 << HOOKS_BEFORE_INITIALIZE_OFFSET : 0)

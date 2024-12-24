@@ -4,8 +4,9 @@ pragma solidity ^0.8.24;
 import {CLPoolManager} from "pancake-v4-core/src/pool-cl/CLPoolManager.sol";
 
 import {IEAS} from "bas-contract/contracts/IEAS.sol";
-import {IEASProxy} from "../src/IEASProxy.sol";
-import {CLTransactionOracleHook} from "../src/pool-cl/CLTransactionOracleHook.sol";
+import {IEASProxy} from "../../src/IEASProxy.sol";
+import {CLExchangeVolumeHook} from "../../src/pool-cl/volume/CLExchangeVolumeHook.sol";
+
 
 import {console} from "forge-std/console.sol";
 import "forge-std/Script.sol";
@@ -39,7 +40,7 @@ contract DeployHookScript is Script {
         IEAS eas = IEAS(_eas);
         IEASProxy easproxy = IEASProxy(_easproxy);
         CLPoolManager poolManager = CLPoolManager(_poolManager);
-        CLTransactionOracleHook hook = new CLTransactionOracleHook(
+        CLExchangeVolumeHook hook = new CLExchangeVolumeHook(
             poolManager,
             easproxy,
             eas,

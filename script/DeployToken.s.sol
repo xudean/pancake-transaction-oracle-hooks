@@ -30,7 +30,7 @@ contract DeployTokenScript is Script {
         MockERC20 token1 = new MockERC20("token1", "T1", 18);
         token0.mint(msg.sender, 10000000000 ether);
         token1.mint(msg.sender, 10000000000 ether);
-        
+
         (Currency currency0, Currency currency1)= SortTokens.sort(token0, token1);
         console.log("TOKEN0=%s", Currency.unwrap(currency0));
         console.log("TOKEN1=%s", Currency.unwrap(currency1));

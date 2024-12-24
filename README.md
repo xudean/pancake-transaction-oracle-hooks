@@ -30,7 +30,7 @@ forge build
 
 ## Transaction Oracle Hooks
 
-The [Transaction Oracle Hooks](./src/pool-cl/CLTransactionOracleHook.sol) implements the `beforeAddLiquidity` and `beforeSwap` hooks.
+The [Transaction Oracle Hooks](src/pool-cl/volume/CLTransactionOracleHook.solk.sol) implements the `beforeAddLiquidity` and `beforeSwap` hooks.
 
 ![Transaction Oracle Hooks Contract](./docs/class/CLTransactionOracleHook.svg)
 

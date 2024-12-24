@@ -27,7 +27,7 @@ contract TestBase is Script, CLUtils {
         address _poolManager = vm.envAddress("CL_POOL_MANAGER");
         console.log("_poolManager=%s", _poolManager);
 
-        address _positionManager = vm.envAddress("CL_POSITION_MANAGER");
+        address payable  _positionManager = payable(vm.envAddress("CL_POSITION_MANAGER"));
         console.log("_positionManager=%s", _positionManager);
         address _universalRouter = vm.envAddress("UNIVERSAL_ROUTER");
         console.log("_universalRouter=%s", _universalRouter);
@@ -69,7 +69,9 @@ contract TestBase is Script, CLUtils {
 
 contract TestInitializeScript is TestBase {
     function _test() public override {
-        poolManager.initialize(key, Constants.SQRT_RATIO_1_1, new bytes(0));
+        console.log("init start!");
+        poolManager.initialize(key, Constants.SQRT_RATIO_1_1);
+        console.log("init end!");
     }
 }
 contract TestAddLiquidityScript is TestBase {
@@ -86,7 +88,6 @@ contract TestSwapScript is TestBase {
                 zeroForOne: true,
                 amountIn: 0.01 ether,
                 amountOutMinimum: 0,
-                sqrtPriceLimitX96: 0,
                 hookData: new bytes(0)
             })
         );
