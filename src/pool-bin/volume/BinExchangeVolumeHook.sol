@@ -10,7 +10,7 @@ import {LPFeeLibrary} from "pancake-v4-core/src/libraries/LPFeeLibrary.sol";
 import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "pancake-v4-core/src/types/BeforeSwapDelta.sol";
 import {BinBaseHook} from "../BinBaseHook.sol";
 
-contract SampleBinDynamicFeeHook is BinBaseHook {
+contract BinExchangeVolumeHook is BinBaseHook {
     using PoolIdLibrary for PoolKey;
 
     constructor(IBinPoolManager poolManager) BinBaseHook(poolManager) {}
