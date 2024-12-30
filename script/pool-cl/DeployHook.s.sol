@@ -3,9 +3,8 @@ pragma solidity ^0.8.24;
 
 import {CLPoolManager} from "pancake-v4-core/src/pool-cl/CLPoolManager.sol";
 
-import {IEAS} from "bas-contract/contracts/IEAS.sol";
-import {IEASProxy} from "../../src/IEASProxy.sol";
 import {CLExchangeVolumeHook} from "../../src/pool-cl/volume/CLExchangeVolumeHook.sol";
+import {IAttestationRegistry} from "../../src/IAttestationRegistry.sol";
 
 
 import {console} from "forge-std/console.sol";
@@ -33,18 +32,13 @@ contract DeployHookScript is Script {
 
         address _eas = vm.envAddress("EAS");
         console.log("_eas=%s", _eas);
-        address _easproxy = vm.envAddress("EASPROXY");
-        console.log("_easproxy=%s", _easproxy);
 
         bytes32 schema = vm.envBytes32("SCHEMA_BYTES");
-        IEAS eas = IEAS(_eas);
-        IEASProxy easproxy = IEASProxy(_easproxy);
+        IAttestationRegistry attestationRegistry = IAttestationRegistry(address(_eas));
         CLPoolManager poolManager = CLPoolManager(_poolManager);
         CLExchangeVolumeHook hook = new CLExchangeVolumeHook(
             poolManager,
-            easproxy,
-            eas,
-            schema
+            attestationRegistry
         );
         console.log("HOOK=%s", address(hook));
     }

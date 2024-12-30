@@ -2,12 +2,10 @@
 
 pragma solidity ^0.8.19;
 
-import "./IEASProxy.sol";
 import {LPFeeLibrary} from "pancake-v4-core/src/libraries/LPFeeLibrary.sol";
 import {PoolId} from "pancake-v4-core/src/types/PoolId.sol";
 import {PoolKey} from "pancake-v4-core/src/types/PoolKey.sol";
-import {IEAS} from "bas-contract/contracts/IEAS.sol";
-import {Attestation, EMPTY_UID, uncheckedInc} from "bas-contract/contracts/Common.sol";
+import {IAttestationRegistry} from "./IAttestationRegistry.sol";
 
 abstract contract BaseFeeDiscountHook{
     using LPFeeLibrary for uint24;
@@ -30,19 +28,15 @@ abstract contract BaseFeeDiscountHook{
     // baseValue=50% * fee
     mapping(PoolId => uint24) public poolFeeDiscountMapping;
     // AttestationRegistry
-    IEASProxy public easProxy;
-    bytes32 public schemaBytes;
-    IEAS public eas;
+    IAttestationRegistry internal  iAttestationRegistry;
 
     //Use mapping for efficiency
     mapping(string => bool) private supportedExchangesMapping;
     //attestation will expired in 7 days
     uint private defaultValidityOfAttestation = 7 * 24 * 60 * 60;
 
-    constructor(IEASProxy _easProxy, IEAS _eas, bytes32 _schemaBytes) {
-        easProxy = _easProxy;
-        eas = _eas;
-        schemaBytes = _schemaBytes;
+    constructor(IAttestationRegistry _iAttestationRegistry) {
+        iAttestationRegistry = _iAttestationRegistry;
         supportedExchangesMapping["okx"] = true;
         supportedExchangesMapping["binance"] = true;
     }
@@ -58,38 +52,6 @@ abstract contract BaseFeeDiscountHook{
     }
 
     function _checkAttestations(address sender) internal view returns (uint24) {
-        bytes32[] memory uids = easProxy.getPadoAttestations(sender, schemaBytes);
-        bool hasValidAttestation = false;
-        for (uint256 i = 0; i < uids.length; i = uncheckedInc(i)) {
-            Attestation memory ats = eas.getAttestation(uids[i]);
-            // prettier-ignore
-            (
-                string memory proofType,
-                string memory source,
-                string memory content,
-                string memory condition,
-                bytes32 sourceUserIdHash,
-                bool result,
-                uint64 timestamp,
-                bytes32 userIdHash
-            ) = abi.decode(ats.data, (string, string, string, string, bytes32, bool, uint64, bytes32));
-            if (!_compareStrings(content, "Spot 30-Day Trade Volume")) {
-                continue;
-            }
-            if (!supportedExchangesMapping[source]) {
-                revert NotSupportedExchange();
-            }
-            //check timestamp in 7 days
-            if (block.timestamp - timestamp > defaultValidityOfAttestation) {
-                revert AttestationExpired();
-            }
-            //condition , base value ,such 100
-            hasValidAttestation = true;
-            break;
-        }
-        if(!hasValidAttestation){
-            revert NoAttestationEligibility();
-        }
         //todo means 50%
         return 50000;
     }

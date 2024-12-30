@@ -7,3 +7,6 @@
 [submodule "lib/bas-contract"]
 	path = lib/bas-contract
 	url = https://github.com/bnb-attestation-service/bas-contract.git
+[submodule "lib/zkTLS-contracts"]
+	path = lib/zkTLS-contracts
+	url = https://github.com/primus-labs/zkTLS-contracts

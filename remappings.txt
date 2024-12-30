@@ -7,3 +7,4 @@ pancake-v4-periphery/=lib/pancake-v4-universal-router/lib/pancake-v4-periphery/
 pancake-v4-universal-router/=lib/pancake-v4-universal-router/
 permit2/=lib/pancake-v4-universal-router/lib/pancake-v4-periphery/lib/permit2/
 bas-contract/=lib/bas-contract
+zkTLS-contracts/=lib/zkTLS-contracts
