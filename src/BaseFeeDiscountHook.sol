@@ -22,16 +22,13 @@ abstract contract BaseFeeDiscountHook{
     event BeforeAddLiquidity(address indexed sender);
     event BeforeSwap(address indexed sender);
 
-    // poolId => (baseValue => feeDiscount)
-    // mapping(PoolId => mapping(uint32=>uint24)) public poolFeeDiscountMapping;
-    //poolId=>feeDiscount
-    // baseValue=50% * fee
-    mapping(PoolId => uint24) public poolFeeDiscountMapping;
+    mapping(PoolId => uint24) public poolFeeMapping;
     // AttestationRegistry
     IAttestationRegistry internal  iAttestationRegistry;
 
     //Use mapping for efficiency
     mapping(string => bool) private supportedExchangesMapping;
+
     //attestation will expired in 7 days
     uint private defaultValidityOfAttestation = 7 * 24 * 60 * 60;
 
@@ -42,18 +39,29 @@ abstract contract BaseFeeDiscountHook{
     }
 
     function initPoolFeeDiscount(PoolKey memory poolKey, bytes[] memory parameters) internal {
+        //todo
         PoolId id = poolKey.toId();
     }
 
-    function getFeeDiscount(address user, PoolKey memory poolKey) internal view returns (uint24) {
-        //Check the address has a attestation and the attestation is not expired
-        uint24 lpFee = poolKey.fee.getInitialLPFee();
-        return 0;
+    function getFeeDiscount(address sender, PoolKey memory poolKey) internal view returns (uint24) {
+        uint24 poolFee = poolFeeMapping[poolKey.toId()];
+        if (!_checkAttestations(sender)) {
+            //no discount
+            return poolFee | LPFeeLibrary.OVERRIDE_FEE_FLAG;
+        }else{
+            //There is a 50% discount on the handling fee for eligible certificates
+            return (poolFee / 2) | LPFeeLibrary.OVERRIDE_FEE_FLAG;
+        }
     }
 
-    function _checkAttestations(address sender) internal view returns (uint24) {
-        //todo means 50%
-        return 50000;
+    /*
+     * @dev Check the user has a attestation and the attestation is not expired
+     * @param sender
+     * @return bool , sender has valid attestation.
+     */
+    function _checkAttestations(address sender) internal view returns (bool) {
+        //todo
+        return true;
     }
 
     /**

@@ -71,9 +71,8 @@ contract CLExchangeVolumeHook is CLBaseHook , BaseFeeDiscountHook{
         poolManagerOnly
         returns (bytes4, BeforeSwapDelta, uint24)
     {
-        uint24 fee = _checkAttestations(tx.origin);
+        uint24 fee = getFeeDiscount(tx.origin,key);
         emit BeforeSwap(sender);
-
         return (this.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee);
     }
 
