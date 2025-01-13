@@ -6,7 +6,6 @@ import {CLPoolManager} from "pancake-v4-core/src/pool-cl/CLPoolManager.sol";
 import {CLExchangeVolumeHook} from "../../src/pool-cl/volume/CLExchangeVolumeHook.sol";
 import {IAttestationRegistry} from "../../src/IAttestationRegistry.sol";
 
-
 import {console} from "forge-std/console.sol";
 import "forge-std/Script.sol";
 
@@ -36,10 +35,7 @@ contract DeployHookScript is Script {
         bytes32 schema = vm.envBytes32("SCHEMA_BYTES");
         IAttestationRegistry attestationRegistry = IAttestationRegistry(address(_eas));
         CLPoolManager poolManager = CLPoolManager(_poolManager);
-        CLExchangeVolumeHook hook = new CLExchangeVolumeHook(
-            poolManager,
-            attestationRegistry
-        );
+        CLExchangeVolumeHook hook = new CLExchangeVolumeHook(poolManager, attestationRegistry, msg.sender);
         console.log("HOOK=%s", address(hook));
     }
 }

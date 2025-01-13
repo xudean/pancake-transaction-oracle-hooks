@@ -23,11 +23,12 @@ contract TestBase is Script, CLUtils {
     Currency currency1;
     PoolKey key;
     IHooks hook;
+
     function setUp() public {
         address _poolManager = vm.envAddress("CL_POOL_MANAGER");
         console.log("_poolManager=%s", _poolManager);
 
-        address payable  _positionManager = payable(vm.envAddress("CL_POSITION_MANAGER"));
+        address payable _positionManager = payable(vm.envAddress("CL_POSITION_MANAGER"));
         console.log("_positionManager=%s", _positionManager);
         address _universalRouter = vm.envAddress("UNIVERSAL_ROUTER");
         console.log("_universalRouter=%s", _universalRouter);
@@ -74,11 +75,13 @@ contract TestInitializeScript is TestBase {
         console.log("init end!");
     }
 }
+
 contract TestAddLiquidityScript is TestBase {
     function _test() public override {
         addLiquidity(key, 1 ether, 1 ether, -60, 60, msg.sender);
     }
 }
+
 contract TestSwapScript is TestBase {
     function _test() public override {
         MockERC20(Currency.unwrap(currency0)).mint(msg.sender, 0.01 ether);

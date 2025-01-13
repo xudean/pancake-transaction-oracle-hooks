@@ -11,7 +11,7 @@ contract JsonParserTest is Test {
     using JsonParser for string;
     using Strings for string;
 
-    string public originTxt ;
+    string public originTxt;
 
     //only support string : "100"
     function setUp() public {
@@ -20,8 +20,7 @@ contract JsonParserTest is Test {
 
     function testParser1() public {
         string memory baseValue = originTxt.extractValue("baseValue");
-        console.log("baseValue:",baseValue);
+        console.log("baseValue:", baseValue);
         assertTrue(baseValue.equal("100"), "baseValue is not 100");
     }
-
 }
