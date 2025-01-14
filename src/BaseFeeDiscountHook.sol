@@ -20,17 +20,15 @@ abstract contract BaseFeeDiscountHook is Ownable {
     event BeforeSwap(address indexed sender);
 
     uint24 private defaultFee = 3000;
+
+    uint32 private baseValue = 10000;
+
     // mapping(PoolId => uint24) public poolFeeMapping;
     // AttestationRegistry
     IAttestationRegistry internal iAttestationRegistry;
 
-    // Use mapping for efficiency
-    mapping(string => bool) private supportedExchangesMapping;
-
     constructor(IAttestationRegistry _iAttestationRegistry, address initialOwner) Ownable(initialOwner) {
         iAttestationRegistry = _iAttestationRegistry;
-        supportedExchangesMapping["okx"] = true;
-        supportedExchangesMapping["binance"] = true;
         _transferOwnership(initialOwner);
     }
 
@@ -47,10 +45,19 @@ abstract contract BaseFeeDiscountHook is Ownable {
     /*
       @dev Set default fee for pool
       @param fee
-      @return bool , sender has valid attestation.
+      @return
      */
     function setDefaultFee(uint24 fee) external onlyOwner {
         defaultFee = fee;
+    }
+
+    /*
+    @dev Set baseValue
+      @param _baseValue
+      @return
+     */
+    function setBaseValue(uint24 _baseValue) external onlyOwner {
+        baseValue = _baseValue;
     }
 
     /*
@@ -61,13 +68,14 @@ abstract contract BaseFeeDiscountHook is Ownable {
     function _checkAttestations(address sender) internal view returns (bool) {
         // Get attestations for the sender
         Attestation[] memory attestations = iAttestationRegistry.getAttestationByRecipient(sender);
-
+        if(attestations.length == 0){
+            return false;
+        }
         // Iterate through the attestations
-        for (uint256 i = attestations.length - 1; i >= 0; i--) {
-            Attestation memory attestation = attestations[i];
-
+        for (uint256 i = attestations.length; i > 0; i--) {
+            Attestation memory attestation = attestations[i - 1];
             // Ensure attestation has a valid timestamp field
-            if (block.timestamp - attestation.timestamp <= 7 days && supportedExchangesMapping[attestation.exchange]) {
+            if (block.timestamp - attestation.timestamp <= 7 days && attestation.baseValue >= baseValue) {
                 return true; // Valid attestation found
             }
         }

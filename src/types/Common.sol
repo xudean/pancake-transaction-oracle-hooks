@@ -6,5 +6,5 @@ struct Attestation {
     address recipient;
     string exchange;
     uint32 baseValue;
-    uint64 timestamp;
+    uint256 timestamp;
 }
