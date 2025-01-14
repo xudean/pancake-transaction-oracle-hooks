@@ -1,4 +1,4 @@
-pragma solidity ^0.8.2;
+pragma solidity ^0.8.24;
 
 import "pancake-v4-core/src/pool-cl/interfaces/ICLHooks.sol";
 import {PoolKey} from "pancake-v4-core/src/types/PoolKey.sol";
