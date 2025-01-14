@@ -17,7 +17,7 @@ import {console} from "forge-std/console.sol";
 import {IVault} from "pancake-v4-core/src/interfaces/IVault.sol";
 import {Vault} from "pancake-v4-core/src/Vault.sol";
 import {LPFeeLibrary} from "pancake-v4-core/src/libraries/LPFeeLibrary.sol";
-
+import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
 
 contract CLExchangeVolumeHookTest is Test {
     CLExchangeVolumeHook public clExchangeVolumeHook;
@@ -38,17 +38,19 @@ contract CLExchangeVolumeHookTest is Test {
             baseValue: 100000,
             timestamp: block.timestamp
         });
+        console.log("address_(this) is", address(this));
         console.log("block.timestamp:", block.timestamp);
         MockAttestationRegistry(address(iAttestationRegistry)).addAttestation(attestation);
 
         // Initialize the CLExchangeVolumeHook with the mock registry
         clExchangeVolumeHook = new CLExchangeVolumeHook(clPoolManager, iAttestationRegistry, msg.sender);
+        console.log("clExchangeVolumeHook owner is:", clExchangeVolumeHook.owner());
     }
 
     function testBeforeSwap() public {
         // Fetch attestation by recipient
         Attestation[] memory fetchedAttestation =
-                                MockAttestationRegistry(address(iAttestationRegistry)).getAttestationByRecipient(address(this));
+            MockAttestationRegistry(address(iAttestationRegistry)).getAttestationByRecipient(address(this));
 
         // Define a valid PoolKey (adjust fields as per actual definition)
         PoolKey memory poolKey = PoolKey({
@@ -68,16 +70,49 @@ contract CLExchangeVolumeHookTest is Test {
         });
         console.logString("start swap");
         vm.prank(address(clPoolManager));
-        (bytes4 selector1,BeforeSwapDelta beforeSwapDelta1,uint24 fee1) = clExchangeVolumeHook.beforeSwap(address(clPoolManager), poolKey, swapParams, abi.encode("0"));
+        (bytes4 selector1, BeforeSwapDelta beforeSwapDelta1, uint24 fee1) =
+            clExchangeVolumeHook.beforeSwap(address(clPoolManager), poolKey, swapParams, abi.encode("0"));
         console.logUint(fee1);
         assertTrue(fee1 == (3000 | LPFeeLibrary.OVERRIDE_FEE_FLAG), "fee1 is not equal");
         vm.stopPrank();
 
         vm.startPrank(address(clPoolManager), address(clPoolManager));
-        (bytes4 selector2,BeforeSwapDelta beforeSwapDelta2,uint24 fee2) = clExchangeVolumeHook.beforeSwap(address(clPoolManager), poolKey, swapParams, abi.encode("0"));
+        (bytes4 selector2, BeforeSwapDelta beforeSwapDelta2, uint24 fee2) =
+            clExchangeVolumeHook.beforeSwap(address(clPoolManager), poolKey, swapParams, abi.encode("0"));
         console.logUint(fee2);
         assertTrue(fee2 == (1500 | LPFeeLibrary.OVERRIDE_FEE_FLAG), "fee2 is not equal");
         vm.stopPrank();
+    }
 
+    function testOnlyOwnerCanChangeFee() public {
+        // Test that non-owner cannot change the fee
+        address nonOwner = address(this);
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, nonOwner));
+        clExchangeVolumeHook.setDefaultFee(5000);
+
+        // Simulate the owner calling the function
+        address owner = clExchangeVolumeHook.owner();
+        vm.prank(owner); // Mock the caller as the owner
+        clExchangeVolumeHook.setDefaultFee(5000);
+
+        // Verify the state update
+        uint256 updatedFee = clExchangeVolumeHook.getDefaultFee();
+        assertEq(updatedFee, 5000);
+    }
+
+    function testBaseValue() public {
+        // Test that non-owner cannot change the baseValue
+        address nonOwner = address(this);
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, nonOwner));
+        clExchangeVolumeHook.setBaseValue(20000);
+
+        // Simulate the owner calling the function
+        address owner = clExchangeVolumeHook.owner();
+        vm.prank(owner); // Mock the caller as the owner
+        clExchangeVolumeHook.setBaseValue(20000);
+
+        // Verify the state update
+        uint256 updatedFee = clExchangeVolumeHook.getBaseValue();
+        assertEq(updatedFee, 20000);
     }
 }

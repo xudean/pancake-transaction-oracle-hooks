@@ -21,7 +21,7 @@ abstract contract BaseFeeDiscountHook is Ownable {
 
     uint24 private defaultFee = 3000;
 
-    uint32 private baseValue = 10000;
+    uint24 private baseValue = 10000;
 
     // mapping(PoolId => uint24) public poolFeeMapping;
     // AttestationRegistry
@@ -52,12 +52,28 @@ abstract contract BaseFeeDiscountHook is Ownable {
     }
 
     /*
+      @dev Get default fee
+      @return uint24
+     */
+    function getDefaultFee() external view returns (uint24) {
+        return defaultFee;
+    }
+
+    /*
     @dev Set baseValue
       @param _baseValue
       @return
      */
     function setBaseValue(uint24 _baseValue) external onlyOwner {
         baseValue = _baseValue;
+    }
+
+    /*
+      @dev Get baseValue
+      @return uint24
+     */
+    function getBaseValue() external view returns (uint24) {
+        return baseValue;
     }
 
     /*
@@ -68,7 +84,7 @@ abstract contract BaseFeeDiscountHook is Ownable {
     function _checkAttestations(address sender) internal view returns (bool) {
         // Get attestations for the sender
         Attestation[] memory attestations = iAttestationRegistry.getAttestationByRecipient(sender);
-        if(attestations.length == 0){
+        if (attestations.length == 0) {
             return false;
         }
         // Iterate through the attestations
