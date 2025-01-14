@@ -13,7 +13,6 @@ import {console} from "forge-std/console.sol";
 import "forge-std/Script.sol";
 
 contract DeployTokenScript is Script {
-
     function run() public {
         console.log("msg.sender %s", msg.sender);
         console.log("script %s", address(this));
@@ -39,8 +38,8 @@ contract DeployTokenScript is Script {
         console.log("_positionManager=%s", _positionManager);
         address _universalRouter = vm.envAddress("UNIVERSAL_ROUTER");
         console.log("_universalRouter=%s", _universalRouter);
-        CLPositionManager positionManager =  CLPositionManager(_positionManager);
-        UniversalRouter universalRouter =  UniversalRouter(payable(_universalRouter));
+        CLPositionManager positionManager = CLPositionManager(_positionManager);
+        UniversalRouter universalRouter = UniversalRouter(payable(_universalRouter));
         IAllowanceTransfer permit2 = positionManager.permit2();
 
         MockERC20 token0 = MockERC20(_token0);

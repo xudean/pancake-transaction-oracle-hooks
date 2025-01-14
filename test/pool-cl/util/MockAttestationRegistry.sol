@@ -1,18 +1,25 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.24;
 
 import {Attestation as PrimusAttestation} from "zkTLS-contracts/src/IPrimusZKTLS.sol";
-import {Attestation} from "../types/Common.sol";
-import {IAttestationRegistry} from "../IAttestationRegistry.sol";
-import {IPrimusZKTLS} from "zkTLS-contracts/src/IPrimusZKTLS.sol";
+import {Attestation} from "../../../src/types/Common.sol";
+import {IAttestationRegistry} from "../../../src/IAttestationRegistry.sol";
+import {console} from "forge-std/console.sol";
 
-contract AttestationRegistry is IAttestationRegistry {
+contract MockAttestationRegistry is IAttestationRegistry {
     mapping(bytes32 => Attestation) public attestations;
     mapping(address => bytes32[]) public attestationsOfAddress;
-    IPrimusZKTLS internal primusZKTLS;
 
     function submitAttestation(PrimusAttestation memory attestation) public returns (bytes32) {
         return bytes32(0);
+    }
+
+    function addAttestation(Attestation memory attestation) public {
+        bytes32 uid = keccak256(abi.encode(attestation));
+        attestations[uid] = attestation;
+        console.log("addAttestation recipient", attestation.recipient);
+        attestationsOfAddress[attestation.recipient].push(uid);
     }
 
     function getAttestationByRecipient(address recipient) public view returns (Attestation[] memory) {

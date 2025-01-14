@@ -30,19 +30,17 @@ contract CLUtils {
     CLPositionManager positionManager;
     UniversalRouter universalRouter;
 
-    function getPoolKey(
-        Currency currency0,
-        Currency currency1,
-        IHooks hook
-    ) internal returns (PoolKey memory poolKey) {
+    function getPoolKey(Currency currency0, Currency currency1, IHooks hook)
+        internal
+        returns (PoolKey memory poolKey)
+    {
         poolKey = PoolKey({
             currency0: currency0,
             currency1: currency1,
             hooks: hook,
             poolManager: poolManager,
             fee: uint24(3000), // 0.3% fee
-            parameters: bytes32(uint256(hook.getHooksRegistrationBitmap()))
-        .setTickSpacing(10) // tickSpacing: 10
+            parameters: bytes32(uint256(hook.getHooksRegistrationBitmap())).setTickSpacing(10) // tickSpacing: 10
         });
     }
 
@@ -65,10 +63,10 @@ contract CLUtils {
             amount0Max,
             amount1Max
         );
-//        PositionConfig memory config = PositionConfig({poolKey: key, tickLower: tickLower, tickUpper: tickUpper});
-//        Plan memory planner = Planner.init().add(
-//            Actions.CL_MINT_POSITION, abi.encode(config, liquidity, amount0Max, amount1Max, recipient, new bytes(0))
-//        );
+        //        PositionConfig memory config = PositionConfig({poolKey: key, tickLower: tickLower, tickUpper: tickUpper});
+        //        Plan memory planner = Planner.init().add(
+        //            Actions.CL_MINT_POSITION, abi.encode(config, liquidity, amount0Max, amount1Max, recipient, new bytes(0))
+        //        );
         Plan memory planner = Planner.init().add(
             Actions.CL_MINT_POSITION,
             abi.encode(
@@ -79,7 +77,7 @@ contract CLUtils {
                 amount0Max,
                 amount1Max,
                 recipient,
-                new bytes(0)//hookdata
+                new bytes(0) //hookdata
             )
         );
         bytes memory data = planner.finalizeModifyLiquidityWithClose(key);
@@ -104,17 +102,16 @@ contract CLUtils {
             amount0,
             amount1
         );
-//        PositionConfig memory config = PositionConfig({poolKey: key, tickLower: tickLower, tickUpper: tickUpper});
-//
-//        // amount0Min and amount1Min is 0 as some hook takes a fee from here
-//        Plan memory planner = Planner.init().add(
-//            Actions.CL_DECREASE_LIQUIDITY, abi.encode(tokenId, config, liquidity, 0, 0, new bytes(0))
-//        );
+        //        PositionConfig memory config = PositionConfig({poolKey: key, tickLower: tickLower, tickUpper: tickUpper});
+        //
+        //        // amount0Min and amount1Min is 0 as some hook takes a fee from here
+        //        Plan memory planner = Planner.init().add(
+        //            Actions.CL_DECREASE_LIQUIDITY, abi.encode(tokenId, config, liquidity, 0, 0, new bytes(0))
+        //        );
         //amount0?
         Plan memory planner = Planner.init().add(
-            Actions.CL_DECREASE_LIQUIDITY,
-            abi.encode(tokenId, amount0, liquidity, 0, 0, new bytes(0)
-            ));
+            Actions.CL_DECREASE_LIQUIDITY, abi.encode(tokenId, amount0, liquidity, 0, 0, new bytes(0))
+        );
         bytes memory data = planner.finalizeModifyLiquidityWithClose(key);
         positionManager.modifyLiquidities(data, block.timestamp);
     }

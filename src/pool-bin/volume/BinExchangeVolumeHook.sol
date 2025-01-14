@@ -1,4 +1,4 @@
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.24;
 
 import "pancake-v4-core/src/pool-cl/interfaces/ICLHooks.sol";
 import {PoolKey} from "pancake-v4-core/src/types/PoolKey.sol";
@@ -14,7 +14,6 @@ contract BinExchangeVolumeHook is BinBaseHook {
     using PoolIdLibrary for PoolKey;
 
     constructor(IBinPoolManager poolManager) BinBaseHook(poolManager) {}
-
 
     function getHooksRegistrationBitmap() external pure override returns (uint16) {
         return _hooksRegistrationBitmapFrom(
@@ -37,21 +36,21 @@ contract BinExchangeVolumeHook is BinBaseHook {
         );
     }
 
-    function afterMint(address, PoolKey calldata, IBinPoolManager.MintParams calldata,  BalanceDelta balanceDelta, bytes calldata)
-    external
-    override
-    returns (bytes4, BalanceDelta)
-    {
+    function afterMint(
+        address,
+        PoolKey calldata,
+        IBinPoolManager.MintParams calldata,
+        BalanceDelta balanceDelta,
+        bytes calldata
+    ) external override returns (bytes4, BalanceDelta) {
         return (this.afterMint.selector, balanceDelta);
     }
 
     function beforeSwap(address, PoolKey calldata, bool, int128, bytes calldata)
-    external
-    override
-    returns (bytes4, BeforeSwapDelta, uint24)
+        external
+        override
+        returns (bytes4, BeforeSwapDelta, uint24)
     {
-
-
         return (this.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, 0);
     }
 }
