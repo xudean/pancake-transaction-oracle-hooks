@@ -35,7 +35,7 @@ contract CLExchangeVolumeHookTest is Test {
             attestationId: keccak256(abi.encodePacked("1")), // Generate a unique ID
             recipient: address(clPoolManager),
             exchange: "binance",
-            baseValue: 100000,
+            value: 100000,
             timestamp: block.timestamp
         });
         console.log("address_(this) is", address(this));
