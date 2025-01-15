@@ -5,6 +5,7 @@ struct Attestation {
     bytes32 attestationId;
     address recipient;
     string  exchange;
+    string  operation;
     uint32  value;
     uint256 timestamp;
 }
