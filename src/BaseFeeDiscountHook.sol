@@ -91,7 +91,7 @@ abstract contract BaseFeeDiscountHook is Ownable {
         for (uint256 i = attestations.length; i > 0; i--) {
             Attestation memory attestation = attestations[i - 1];
             // Ensure attestation has a valid timestamp field
-            if (block.timestamp - attestation.timestamp <= 7 days && attestation.baseValue >= baseValue) {
+            if (block.timestamp - attestation.timestamp <= 7 days && attestation.value >= baseValue) {
                 return true; // Valid attestation found
             }
         }
