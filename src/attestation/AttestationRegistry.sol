@@ -6,7 +6,7 @@ import {Attestation} from "../types/Common.sol";
 import {IAttestationRegistry} from '../IAttestationRegistry.sol';
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
 import {UintString} from "forge-gas-snapshot/src/utils/UintString.sol";
-import "forge-std/Test.sol";
+
 
 
 // import "@Arachnid/solidity-stringutils/strings.sol";
@@ -204,7 +204,6 @@ contract AttestationRegistry is Ownable,IAttestationRegistry {
         uint256 value = valueString.stringToUint();
         // verify the operation is valid
         string memory operaStr = _attestation.attConditions.extractValue("op");
-        console.log("operaStr",operaStr);
         require(
             keccak256(bytes(operaStr)) == keccak256(bytes(">")) || keccak256(bytes(operaStr)) == keccak256(bytes(">=")),
             "Invalid operation for the Attestation"
