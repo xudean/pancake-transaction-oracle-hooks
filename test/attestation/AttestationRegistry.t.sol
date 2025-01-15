@@ -33,7 +33,7 @@ contract AttestationRegistryTest is Test {
         require(addressBytes.length == 42, "Invalid address length");
         address addr;
         assembly {
-            addr := mload(add(_addressString, 20)) // 从字符串中的偏移位置加载地址
+            addr := mload(add(_addressString, 20)) 
         }
         return addr;
     }
@@ -97,6 +97,7 @@ contract AttestationRegistryTest is Test {
                 "https://www.okx.com/v3/users/fee/trading-volume-progress?t=1736757319823",
                 "okx",
                 "$.data.requirements[1].currentVolume",
+                 ">",
                 "100",
                 attestation.timestamp
             )
@@ -118,7 +119,6 @@ contract AttestationRegistryTest is Test {
         registry.addUrlToExchange("https://www.binance.com/bapi/accounts/v1/private/vip/vip-portal/vip-fee/vip-programs-and-fees" ,"bsc");
         vm.prank(owner);
         registry.addExchangeToParsePath("bsc", "$.data.traderProgram.spotTrader.spotVolume30d");
-        console.log("---1---");
         AttNetworkRequest memory request = AttNetworkRequest({
             url: "https://www.binance.com/bapi/accounts/v1/private/vip/vip-portal/vip-fee/vip-programs-and-fees",
             header: "",
@@ -145,7 +145,7 @@ contract AttestationRegistryTest is Test {
             request: request,
             reponseResolve: response,
             data: "",
-            attConditions: "[{\"op\":\">\",\"field\":\"$.data.traderProgram.spotTrader.spotVolume30d\",\"value\":\"1000\"}]",
+            attConditions: "[{\"op\":\">=\",\"field\":\"$.data.traderProgram.spotTrader.spotVolume30d\",\"value\":\"1000\"}]",
             timestamp: uint64(block.timestamp),
             additionParams: "",
             attestors: attestors,
@@ -162,6 +162,7 @@ contract AttestationRegistryTest is Test {
                 "https://www.binance.com/bapi/accounts/v1/private/vip/vip-portal/vip-fee/vip-programs-and-fees",
                 "bsc",
                 "$.data.traderProgram.spotTrader.spotVolume30d",
+                 ">="
                 "1000",
                 attestation.timestamp
             )
@@ -176,6 +177,52 @@ contract AttestationRegistryTest is Test {
         assertEq(savedAttestation[0].value, 1000);
         assertEq(savedAttestation[0].timestamp, attestation.timestamp);
     }
+
+    function testSubmitAttestationFailed() public {
+        vm.prank(owner);
+        registry.addUrlToExchange("https://www.binance.com/bapi/accounts/v1/private/vip/vip-portal/vip-fee/vip-programs-and-fees" ,"bsc");
+        vm.prank(owner);
+        registry.addExchangeToParsePath("bsc", "$.data.traderProgram.spotTrader.spotVolume30d");
+        AttNetworkRequest memory request = AttNetworkRequest({
+            url: "https://www.binance.com/bapi/accounts/v1/private/vip/vip-portal/vip-fee/vip-programs-and-fees",
+            header: "",
+            method: "GET",
+            body: ""
+            });
+        AttNetworkResponseResolve[] memory response = new AttNetworkResponseResolve[](1);
+        response[0] = AttNetworkResponseResolve({
+            keyName: "",
+            parseType: "",
+            parsePath: "$.data.traderProgram.spotTrader.spotVolume30d"
+        });
+        Attestor[] memory attestors = new Attestor[](1);
+        address addr = stringToAddress("0xe02bd7a6c8aa401189aebb5bad755c2610940a73");
+        attestors[0] = Attestor({
+            attestorAddr: addr,
+            url: "https://primuslabs.org"
+        });
+        bytes[] memory signas = new bytes[](1);
+        signas[0] = bytes("0x2fccc45102cd1b46b3da6543e75ab906c768f1c5bd5adf6d1cd9cd1b305e0609746a373e92c4295be2d9b5f3dcf8623c2e369698e964ed9c10d658250a0d2f211c");
+    
+        PrimusAttestation memory attestation = PrimusAttestation({
+            recipient: address(this),
+            request: request,
+            reponseResolve: response,
+            data: "",
+            attConditions: "[{\"op\":\"<\",\"field\":\"$.data.traderProgram.spotTrader.spotVolume30d\",\"value\":\"1000\"}]",
+            timestamp: uint64(block.timestamp),
+            additionParams: "",
+            attestors: attestors,
+            signatures: signas
+        });
+        vm.deal(address(this), 1 ether);
+        vm.expectEmit(true, true, true, true);
+        emit FeeReceived(address(this), submissionFee);
+      
+        vm.expectRevert("Invalid operation for the Attestation");
+        registry.submitAttestation{value: submissionFee}(attestation);
+    }
+
 
     function testFailSubmitAttestationInsufficientFee() public {
         AttNetworkRequest memory request = AttNetworkRequest({
@@ -192,7 +239,6 @@ contract AttestationRegistryTest is Test {
         });
 
         Attestor[] memory attestors = new Attestor[](1);
-        //address("0xe02bd7a6c8aa401189aebb5bad755c2610940a73")
         address addr = stringToAddress("0xe02bd7a6c8aa401189aebb5bad755c2610940a73");
         attestors[0] = Attestor({
             attestorAddr: addr,
@@ -205,7 +251,7 @@ contract AttestationRegistryTest is Test {
             reponseResolve: response,
             data: "",
             timestamp: uint64(block.timestamp),
-            attConditions: "{\"value\":\"100\"}",
+            attConditions: "{\"op\":\">\",\"value\":\"100\"}",
             additionParams: "",
             attestors: attestors,
             signatures: new bytes[](0)
@@ -241,7 +287,7 @@ contract AttestationRegistryTest is Test {
             data:"",
             timestamp: uint64(block.timestamp),
             additionParams: "",
-            attConditions: "{\"value\":\"100\"}",
+            attConditions: "{\"op\":\">\",\"value\":\"100\"}",
             attestors:  new Attestor[](0),
             signatures: new bytes[](0)
         });
