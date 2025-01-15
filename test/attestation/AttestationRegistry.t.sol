@@ -25,7 +25,7 @@ contract AttestationRegistryTest is Test {
     function testAddUrlToExchange() public {
         vm.prank(owner);
         registry.addUrlToExchange("https://example.com", "ExampleExchange");
-        assertEq(registry.dexCheckList("https://example.com"), "ExampleExchange");
+        assertEq(registry.cexCheckList("https://example.com"), "ExampleExchange");
     }
 
     function stringToAddress(string memory _addressString) public pure returns (address) {
@@ -42,8 +42,9 @@ contract AttestationRegistryTest is Test {
     function testRemoveUrlToExchange() public {
         vm.prank(owner);
         registry.addUrlToExchange("https://example.com", "ExampleExchange");
+        vm.prank(owner);
         registry.removeUrlToExchange("https://example.com");
-        assertEq(bytes(registry.dexCheckList("https://example.com")).length, 0);
+        assertEq(bytes(registry.cexCheckList("https://example.com")).length, 0);
     }
 
     function testSubmitAttestation() public {
