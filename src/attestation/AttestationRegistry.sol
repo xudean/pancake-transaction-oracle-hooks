@@ -6,6 +6,7 @@ import {Attestation} from "../types/Common.sol";
 import {IAttestationRegistry} from '../IAttestationRegistry.sol';
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
 import {UintString} from "forge-gas-snapshot/src/utils/UintString.sol";
+import "forge-std/Test.sol";
 
 
 // import "@Arachnid/solidity-stringutils/strings.sol";
@@ -201,11 +202,18 @@ contract AttestationRegistry is Ownable,IAttestationRegistry {
         // verify the value is valid
         string memory valueString = _attestation.attConditions.extractValue("value");
         uint256 value = valueString.stringToUint();
+        // verify the operation is valid
+        string memory operaStr = _attestation.attConditions.extractValue("op");
+        console.log("operaStr",operaStr);
+        require(
+            keccak256(bytes(operaStr)) == keccak256(bytes(">")) || keccak256(bytes(operaStr)) == keccak256(bytes(">=")),
+            "Invalid operation for the Attestation"
+        );
         bytes32 attestationId = keccak256(
-            abi.encodePacked(_attestation.recipient, url, exchange, actualParsePath, valueString,_attestation.timestamp)
+            abi.encodePacked(_attestation.recipient, url, exchange, actualParsePath, operaStr, valueString, _attestation.timestamp)
         );
         // save the attestation
-        attestations[attestationId] = Attestation(attestationId, _attestation.recipient, exchange, uint32(value), _attestation.timestamp);
+        attestations[attestationId] = Attestation(attestationId, _attestation.recipient, exchange, operaStr,uint32(value), _attestation.timestamp);
         attestationsOfAddress[msg.sender].push(attestationId);
         // emit the AttestationSubmitted event
         emit AttestationSubmitted(attestationId, _attestation.recipient, exchange, value, _attestation.timestamp);
