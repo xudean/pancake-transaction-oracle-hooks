@@ -4,8 +4,8 @@ pragma solidity ^0.8.24;
 import {Attestation as PrimusAttestation, IPrimusZKTLS} from "zkTLS-contracts/src/IPrimusZKTLS.sol";
 import {Attestation} from "../types/Common.sol";
 import {IAttestationRegistry} from '../IAttestationRegistry.sol';
-import "openzeppelin/contracts/access/Ownable.sol";
-import "../utils/stringToUnits.sol";
+import "openzeppelin-contracts/contracts/access/Ownable.sol";
+import {UintString} from "forge-gas-snapshot/src/utils/UintString.sol";
 
 
 // import "@Arachnid/solidity-stringutils/strings.sol";
@@ -13,16 +13,16 @@ import {JsonParser} from "../utils/JsonParser.sol";
 
 contract AttestationRegistry is Ownable,IAttestationRegistry {
     using JsonParser for string;
-    using StringToUintExtension for string;
+    using UintString for string;
 
     // Attestation with AttestationId mapping
     mapping(bytes32 => Attestation) public attestations;
     // Attestation with address mapping
     mapping(address => bytes32[]) public attestationsOfAddress;
-    // DexUrlCheckList mapping url => dexName
-    mapping(string => string) public dexCheckList;
-    // SupportedPlatforms mapping dexName =>reponseResolve[0].parsePath
-    mapping(string => string) public supportedPlatforms;
+    // DexUrlCheckList mapping url => cexName
+    mapping(string => string) public cexCheckList;
+    // cexJsonPathList mapping cexName =>reponseResolve[0].parsePath
+    mapping(string => string) public cexJsonPathList;
 
     // IPrimusZKTLS contract    
     IPrimusZKTLS internal primusZKTLS;
@@ -44,46 +44,75 @@ contract AttestationRegistry is Ownable,IAttestationRegistry {
     // exchange to parsePath removed event
     event ExchangeToParsePathRemoved(string indexed exchange);
 
-    /// @dev Constructor
-    /// @param _primusZKTLS The address of the IPrimusZKTLS contract
-    /// @param _submissionFee The submission fee
-    /// @param _feeRecipient The fee recipient
-    /// @notice The constructor sets the IPrimusZKTLS contract, submission fee, and fee recipient
+    /**
+     *  @dev Constructor
+     *  @param _primusZKTLS The address of the IPrimusZKTLS contract
+     *  @param _submissionFee The submission fee
+     *  @param _feeRecipient The fee recipient
+     *  @notice The constructor sets the IPrimusZKTLS contract, submission fee, and fee recipient
+     * **/
     constructor(address _primusZKTLS, uint256 _submissionFee, address payable _feeRecipient)  Ownable(msg.sender){
         setPrimusZKTLS(_primusZKTLS);
         setSubmissionFee(_submissionFee);
         setFeeRecipient(_feeRecipient);
     }
 
-    /// @dev Add or update the mapping of URL to exchange name
-    /// @param url The URL address
-    /// @param exchange The exchange name
+    /**
+     *  @dev setCexCheckListAndJsonPath
+     *  @param _dexUrls The dexUrls
+     *  @param _dexName The dexName
+     *  @param _jspnPath The jspnPath
+     *  @notice The setCexCheckListAndJsonPath sets the cexCheckList and cexJsonPathList 
+     * **/
+    function setCexCheckListAndJsonPath(string[] memory _dexUrls, string[] memory _dexName, string[] memory _jspnPath) external onlyOwner {
+        require(_dexUrls.length == _dexName.length && _dexName.length == _jspnPath.length, "Array length mismatch");
+        for (uint256 i = 0; i < _dexUrls.length; i++) {
+          cexCheckList[_dexUrls[i]] = _dexName[i];
+          cexJsonPathList[_dexName[i]] = _jspnPath[i];
+        }
+    }    
+
+    /**
+     * @dev Add or update the mapping of URL to exchange name
+     * @param url The URL address
+     * @param exchange The exchange name
+     * @notice The addUrlToExchange function adds or updates the mapping of URL to exchange name
+    */
     function addUrlToExchange(string memory url, string memory exchange) external onlyOwner {
-        dexCheckList[url] = exchange;
+        cexCheckList[url] = exchange;
         emit UrlToExchangeAdded(url, exchange);
     }
 
-    /// @dev Remove the mapping of URL to exchange name
-    /// @param url The URL address
+    /**
+     * @dev Remove the mapping of URL to exchange name
+     * @param url The URL address
+     * @notice The removeUrlToExchange function removes the mapping of URL to exchange name
+    */
     function removeUrlToExchange(string memory url) external onlyOwner {
-        require(bytes(dexCheckList[url]).length > 0, "URL not found");
-        delete dexCheckList[url];
+        require(bytes(cexCheckList[url]).length > 0, "URL not found");
+        delete cexCheckList[url];
         emit UrlToExchangeRemoved(url);
     }
 
-    /// @dev Add or update the mapping of exchange name to parsePath
-    /// @param exchange The exchange name
-    /// @param parsePath The parsing path
+    /**
+     * @dev Add or update the mapping of exchange name to parsePath
+     * @param exchange The exchange name
+     * @param parsePath The parsing path
+     * @notice The addExchangeToParsePath function adds or updates the mapping of exchange name to parsePath
+    */
     function addExchangeToParsePath(string memory exchange, string memory parsePath) external onlyOwner {
-        supportedPlatforms[exchange] = parsePath;
+        cexJsonPathList[exchange] = parsePath;
         emit ExchangeToParsePathAdded(exchange, parsePath);
     }
 
-    /// @dev Remove the mapping of exchange name to parsePath
-    /// @param exchange The exchange name
+    /**
+     * @dev Remove the mapping of exchange name to parsePath
+     * @param exchange The exchange name
+     * @notice The removeExchangeToParsePath function removes the mapping of exchange name to parsePath
+    */
     function removeExchangeToParsePath(string memory exchange) external onlyOwner {
-        require(bytes(supportedPlatforms[exchange]).length > 0, "Exchange not found");
-        delete supportedPlatforms[exchange];
+        require(bytes(cexJsonPathList[exchange]).length > 0, "Exchange not found");
+        delete cexJsonPathList[exchange];
         emit ExchangeToParsePathRemoved(exchange);
     }
 
@@ -100,16 +129,21 @@ contract AttestationRegistry is Ownable,IAttestationRegistry {
         feeRecipient = _feeRecipient;
     }
 
-    /// @dev Set the dex check list
-    // @param _dexUrl The url of the dex
-    // @param _dexName The name of the dex
-    function setDexCheckList(string memory _dexUrl, string memory _dexName) public onlyOwner {
-        dexCheckList[_dexUrl] = _dexName;
+    /**
+     * @dev Set the dex check list
+     * @param _dexUrl The url of the dex
+     * @param _dexName The name of the dex
+     * @notice The setcexCheckList function sets the dex check list
+     * */
+    function setcexCheckList(string memory _dexUrl, string memory _dexName) public onlyOwner {
+        cexCheckList[_dexUrl] = _dexName;
     }
 
-    /// @dev Extract the base URL (ignoring query parameters)
-    /// @param url The full URL
-    /// @return The base URL without query parameters
+    /**
+     * @dev Extract the base URL (ignoring query parameter
+     * @param url The full URL
+     * @return The base URL without query parameters
+    */
     function extractBaseUrl(string memory url) internal pure returns (string memory) {
         bytes memory urlBytes = bytes(url);
 
@@ -121,7 +155,6 @@ contract AttestationRegistry is Ownable,IAttestationRegistry {
                 break;
             }
         }
-
         // Create a new bytes array for the base URL
         bytes memory baseUrlBytes = new bytes(queryStart);
         for (uint256 i = 0; i < queryStart; i++) {
@@ -131,19 +164,22 @@ contract AttestationRegistry is Ownable,IAttestationRegistry {
         return string(baseUrlBytes);
     }
 
-
-    /// @dev submit attestation
-    /// @param _attestation The attestation data to be verified
-    /// @notice The function verifies the attestation data and submits it to the IPrimusZKTLS contract
-    /// @return attestationId The attestationId of the submitted attestation
+    /**
+     * @dev submit attestation
+     * @param _attestation The attestation data to be verified
+     * @notice The function verifies the attestation data and submits it to the IPrimusZKTLS contract
+     * @return attestationId The attestationId of the submitted attestation
+    */
     function submitAttestation(PrimusAttestation calldata _attestation) public payable returns (bytes32){
         require(msg.value >= submissionFee, "Insufficient fee");
         
         // send fee to feeRecipient
-        (bool sent, ) = feeRecipient.call{value: msg.value}("");
-        require(sent, "Failed to send fee");
-        emit FeeReceived(msg.sender, msg.value);
-        
+        if (submissionFee > 0) {
+            (bool sent, ) = feeRecipient.call{value: msg.value}("");
+            require(sent, "Failed to send fee");
+            emit FeeReceived(msg.sender, msg.value);
+        }
+ 
         // verify the attestation is valid
         primusZKTLS.verifyAttestation(_attestation);
         // verify the url is bsc or other chain
@@ -152,11 +188,11 @@ contract AttestationRegistry is Ownable,IAttestationRegistry {
 
         string memory url = _attestation.request.url;
         string memory baseUrl = extractBaseUrl(url);
-        string memory exchange = dexCheckList[baseUrl];
+        string memory exchange = cexCheckList[baseUrl];
         require(bytes(exchange).length > 0, "Unsupported URL");
 
         // verify the parsePath is valid
-        string memory expectedParsePath = supportedPlatforms[exchange];
+        string memory expectedParsePath = cexJsonPathList[exchange];
         string memory actualParsePath = _attestation.reponseResolve[0].parsePath;
         require(
             keccak256(bytes(expectedParsePath)) == keccak256(bytes(actualParsePath)),
@@ -177,6 +213,12 @@ contract AttestationRegistry is Ownable,IAttestationRegistry {
         return attestationId;
     }
 
+    /**
+     * @dev getAttestationByRecipient
+     * @param recipient address
+     * @return Attestation[] memory
+     * @notice get all attestations of the recipient
+     * **/
     function getAttestationByRecipient(address recipient) public view returns (Attestation[] memory){
         bytes32[] memory attestationIds = attestationsOfAddress[recipient];
         Attestation[] memory myAttestations = new Attestation[](attestationIds.length);
