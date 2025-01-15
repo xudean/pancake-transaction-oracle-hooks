@@ -11,7 +11,7 @@ contract MockAttestationRegistry is IAttestationRegistry {
     mapping(bytes32 => Attestation) public attestations;
     mapping(address => bytes32[]) public attestationsOfAddress;
 
-    function submitAttestation(PrimusAttestation memory attestation) public returns (bytes32) {
+    function submitAttestation(PrimusAttestation memory attestation) public payable returns (bytes32) {
         return bytes32(0);
     }
 
