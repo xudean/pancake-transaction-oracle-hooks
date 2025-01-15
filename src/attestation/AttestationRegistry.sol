@@ -7,9 +7,6 @@ import {IAttestationRegistry} from '../IAttestationRegistry.sol';
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
 import {UintString} from "forge-gas-snapshot/src/utils/UintString.sol";
 
-
-
-// import "@Arachnid/solidity-stringutils/strings.sol";
 import {JsonParser} from "../utils/JsonParser.sol";
 
 contract AttestationRegistry is Ownable,IAttestationRegistry {
