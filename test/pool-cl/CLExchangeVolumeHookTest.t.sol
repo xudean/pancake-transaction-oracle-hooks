@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.24;
 
-import "./util/MockAttestationRegistry.sol";
+import "./util/MockAttestationRegistry.t.sol";
 import {Currency} from "pancake-v4-core/src/types/Currency.sol";
 import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "pancake-v4-core/src/types/BeforeSwapDelta.sol";
 import {CLExchangeVolumeHook} from "../../src/pool-cl/volume/CLExchangeVolumeHook.sol";
@@ -18,8 +18,11 @@ import {IVault} from "pancake-v4-core/src/interfaces/IVault.sol";
 import {Vault} from "pancake-v4-core/src/Vault.sol";
 import {LPFeeLibrary} from "pancake-v4-core/src/libraries/LPFeeLibrary.sol";
 import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
+import {CLPoolParametersHelper} from "pancake-v4-core/src/pool-cl/libraries/CLPoolParametersHelper.sol";
 
 contract CLExchangeVolumeHookTest is Test {
+    using CLPoolParametersHelper for bytes32;
+
     CLExchangeVolumeHook public clExchangeVolumeHook;
     IAttestationRegistry public iAttestationRegistry;
     ICLPoolManager public clPoolManager;
@@ -114,5 +117,11 @@ contract CLExchangeVolumeHookTest is Test {
         // Verify the state update
         uint256 updatedFee = clExchangeVolumeHook.getBaseValue();
         assertEq(updatedFee, 20000);
+    }
+
+    function testGetParameters() public {
+        bytes32 parameters = bytes32(uint256(clExchangeVolumeHook.getHooksRegistrationBitmap())).setTickSpacing(10);
+        console.log("parameters:");
+        console.logBytes32(parameters);
     }
 }

@@ -28,14 +28,16 @@ contract DeployHookScript is Script {
     function _deploy() internal {
         address _poolManager = vm.envAddress("CL_POOL_MANAGER");
         console.log("_poolManager=%s", _poolManager);
+        address contractOwner = vm.envAddress("CONTRACT_OWNER");
+        // Log
+        console.log("CONTRACT_OWNER=%s", contractOwner);
+        address attestationRegistry = vm.envAddress("ATTESTATION_REGISTRY");
+        // Log
+        console.log("ATTESTATION_REGISTRY=%s", attestationRegistry);
 
-        address _eas = vm.envAddress("EAS");
-        console.log("_eas=%s", _eas);
-
-        bytes32 schema = vm.envBytes32("SCHEMA_BYTES");
-        IAttestationRegistry attestationRegistry = IAttestationRegistry(address(_eas));
         CLPoolManager poolManager = CLPoolManager(_poolManager);
-        CLExchangeVolumeHook hook = new CLExchangeVolumeHook(poolManager, attestationRegistry, msg.sender);
+        IAttestationRegistry iAttestationRegistry = IAttestationRegistry(attestationRegistry);
+        CLExchangeVolumeHook hook = new CLExchangeVolumeHook(poolManager, iAttestationRegistry, contractOwner);
         console.log("HOOK=%s", address(hook));
     }
 }

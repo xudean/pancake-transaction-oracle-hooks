@@ -16,6 +16,7 @@ import {LiquidityAmounts} from "pancake-v4-periphery/src/pool-cl/libraries/Liqui
 import {Planner, Plan} from "pancake-v4-periphery/src/libraries/Planner.sol";
 import {PoolIdLibrary} from "pancake-v4-core/src/types/PoolId.sol";
 import {PoolKey} from "pancake-v4-core/src/types/PoolKey.sol";
+import {LPFeeLibrary} from "pancake-v4-core/src/libraries/LPFeeLibrary.sol";
 
 import {TickMath} from "pancake-v4-core/src/pool-cl/libraries/TickMath.sol";
 import {UniversalRouter} from "pancake-v4-universal-router/src/UniversalRouter.sol";
@@ -39,7 +40,7 @@ contract CLUtils {
             currency1: currency1,
             hooks: hook,
             poolManager: poolManager,
-            fee: uint24(3000), // 0.3% fee
+            fee: LPFeeLibrary.DYNAMIC_FEE_FLAG, // Dynamic fee
             parameters: bytes32(uint256(hook.getHooksRegistrationBitmap())).setTickSpacing(10) // tickSpacing: 10
         });
     }

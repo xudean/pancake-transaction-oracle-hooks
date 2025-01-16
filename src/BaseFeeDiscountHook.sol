@@ -23,13 +23,14 @@ abstract contract BaseFeeDiscountHook is Ownable {
 
     uint24 private baseValue = 10000;
 
+    uint24 private durationOfAttestation = 7;
+
     // mapping(PoolId => uint24) public poolFeeMapping;
     // AttestationRegistry
     IAttestationRegistry internal iAttestationRegistry;
 
     constructor(IAttestationRegistry _iAttestationRegistry, address initialOwner) Ownable(initialOwner) {
         iAttestationRegistry = _iAttestationRegistry;
-        _transferOwnership(initialOwner);
     }
 
     function getFeeDiscount(address sender, PoolKey memory poolKey) internal view returns (uint24) {
@@ -77,6 +78,31 @@ abstract contract BaseFeeDiscountHook is Ownable {
     }
 
     /*
+      @dev Set durationOfAttestation
+      @param _durationOfAttestation
+      @return
+     */
+    function setDurationOfAttestation(uint24 _durationOfAttestation) external onlyOwner {
+        durationOfAttestation = _durationOfAttestation;
+    }
+
+    /*
+      @dev Get durationOfAttestation
+      @return uint24
+     */
+    function getDurationOfAttestation() external view returns (uint24) {
+        return durationOfAttestation;
+    }
+
+    /*
+      @dev Get attestationRegistry
+      @return IAttestationRegistry
+     */
+    function getAttestationRegistry() external view returns (IAttestationRegistry) {
+        return iAttestationRegistry;
+    }
+
+    /*
       @dev Check the user has a attestation and the attestation is not expired
       @param sender
       @return bool , sender has valid attestation.
@@ -91,7 +117,10 @@ abstract contract BaseFeeDiscountHook is Ownable {
         for (uint256 i = attestations.length; i > 0; i--) {
             Attestation memory attestation = attestations[i - 1];
             // Ensure attestation has a valid timestamp field
-            if (block.timestamp - attestation.timestamp <= 7 days && attestation.value >= baseValue) {
+            if (
+                block.timestamp * 1000 - attestation.timestamp <= durationOfAttestation * 24 * 60 * 60 * 100
+                    && attestation.value >= baseValue
+            ) {
                 return true; // Valid attestation found
             }
         }

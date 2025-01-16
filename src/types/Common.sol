@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 struct Attestation {
     bytes32 attestationId;
     address recipient;
-    string  exchange;
-    uint32  value;
+    string exchange;
+    uint32 value;
     uint256 timestamp;
 }
