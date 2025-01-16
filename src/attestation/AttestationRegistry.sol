@@ -182,7 +182,6 @@ contract AttestationRegistry is Ownable,IAttestationRegistry {
         primusZKTLS.verifyAttestation(_attestation);
         // verify the url is bsc or other chain
         require(_attestation.recipient == msg.sender, "Invalid recipient");
-        require(_attestation.timestamp > 0 && _attestation.timestamp <= block.timestamp, "Invalid timestamp");
 
         string memory url = _attestation.request.url;
         string memory baseUrl = extractBaseUrl(url);
@@ -209,7 +208,7 @@ contract AttestationRegistry is Ownable,IAttestationRegistry {
             abi.encodePacked(_attestation.recipient, url, exchange, actualParsePath, operaStr, valueString, _attestation.timestamp)
         );
         // save the attestation
-        attestations[attestationId] = Attestation(attestationId, _attestation.recipient, exchange, operaStr,uint32(value), _attestation.timestamp);
+        attestations[attestationId] = Attestation(attestationId, _attestation.recipient, exchange,uint32(value), _attestation.timestamp);
         attestationsOfAddress[msg.sender].push(attestationId);
         // emit the AttestationSubmitted event
         emit AttestationSubmitted(attestationId, _attestation.recipient, exchange, value, _attestation.timestamp);
