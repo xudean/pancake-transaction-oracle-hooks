@@ -47,8 +47,8 @@ contract AttestationRegistryTest is Test {
         registry.addUrlToExchange("https://example.com", "ExampleExchange","json/path");
         vm.prank(owner);
         registry.removeUrlToExchange("https://example.com");
-        CexInfo memory info = registry.getCexInfoDetail("https://example.com");
-        assertEq(info.cexName, "");
+        vm.expectRevert("URL not found");
+        registry.getCexInfoDetail("https://example.com");
     }
 
     function testSubmitAttestation() public {
