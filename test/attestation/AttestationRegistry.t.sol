@@ -251,6 +251,137 @@ contract AttestationRegistryTest is Test {
         registry.submitAttestation{value: submissionFee}(attestation);
     }
 
+    function testSubmitAttestationFailedCaseWithExpectedUrl() public {
+        vm.prank(owner);
+        registry.addUrlToCexInfo("https://www.okx.com/v3/users/fee/trading-volume-progress", "okx","$.data.requirements[1].currentVolume");
+     
+        AttNetworkRequest memory request = AttNetworkRequest({
+            url: "https://www.okx.com/v3/users/fee/",
+            header: "",
+            method: "GET",
+            body: ""
+            });
+        AttNetworkResponseResolve[] memory response = new AttNetworkResponseResolve[](1);
+        response[0] = AttNetworkResponseResolve({
+            keyName: "",
+            parseType: "",
+            parsePath: "$.data.requirements[1].currentVolume"
+        });
+        Attestor[] memory attestors = new Attestor[](1);
+        address addr = stringToAddress("0xe02bd7a6c8aa401189aebb5bad755c2610940a73");
+        attestors[0] = Attestor({
+            attestorAddr: addr,
+            url: "https://primuslabs.org"
+        });
+        bytes[] memory signas = new bytes[](1);
+        signas[0] = bytes("0x2fccc45102cd1b46b3da6543e75ab906c768f1c5bd5adf6d1cd9cd1b305e0609746a373e92c4295be2d9b5f3dcf8623c2e369698e964ed9c10d658250a0d2f211c");
+    
+        PrimusAttestation memory attestation = PrimusAttestation({
+            recipient: address(this),
+            request: request,
+            reponseResolve: response,
+            data: "",
+            attConditions: "[{\"op\":\">\",\"field\":\"$.data.requirements[1].currentVolume\",\"value\":\"100\"}]",
+            timestamp: uint64(block.timestamp),
+            additionParams: "",
+            attestors: attestors,
+            signatures: signas
+        });
+        vm.deal(address(this), 1 ether);
+        vm.expectEmit(true, true, true, true);
+        emit FeeReceived(address(this), submissionFee);
+
+        vm.expectRevert("Unsupported URL");
+        registry.submitAttestation{value: submissionFee}(attestation);
+    }
+
+    function testSubmitAttestationFailedCaseWithExpectedUrl2() public {
+        vm.prank(owner);
+        registry.addUrlToCexInfo("https://www.okx.com/v3/users/fee/trading-volume-progress", "okx","$.data.requirements[1].currentVolume");
+     
+        AttNetworkRequest memory request = AttNetworkRequest({
+            url: "https://www.baidu.com",
+            header: "",
+            method: "GET",
+            body: ""
+            });
+        AttNetworkResponseResolve[] memory response = new AttNetworkResponseResolve[](1);
+        response[0] = AttNetworkResponseResolve({
+            keyName: "",
+            parseType: "",
+            parsePath: "$.data.requirements[1].currentVolume"
+        });
+        Attestor[] memory attestors = new Attestor[](1);
+        address addr = stringToAddress("0xe02bd7a6c8aa401189aebb5bad755c2610940a73");
+        attestors[0] = Attestor({
+            attestorAddr: addr,
+            url: "https://primuslabs.org"
+        });
+        bytes[] memory signas = new bytes[](1);
+        signas[0] = bytes("0x2fccc45102cd1b46b3da6543e75ab906c768f1c5bd5adf6d1cd9cd1b305e0609746a373e92c4295be2d9b5f3dcf8623c2e369698e964ed9c10d658250a0d2f211c");
+    
+        PrimusAttestation memory attestation = PrimusAttestation({
+            recipient: address(this),
+            request: request,
+            reponseResolve: response,
+            data: "",
+            attConditions: "[{\"op\":\">\",\"field\":\"$.data.requirements[1].currentVolume\",\"value\":\"100\"}]",
+            timestamp: uint64(block.timestamp),
+            additionParams: "",
+            attestors: attestors,
+            signatures: signas
+        });
+        vm.deal(address(this), 1 ether);
+        vm.expectEmit(true, true, true, true);
+        emit FeeReceived(address(this), submissionFee);
+
+        vm.expectRevert("Unsupported URL");
+        registry.submitAttestation{value: submissionFee}(attestation);
+    }
+
+    function testSubmitAttestationFailedCaseWithExpectedValue() public {
+        vm.prank(owner);
+        registry.addUrlToCexInfo("https://www.okx.com/v3/users/fee/trading-volume-progress", "okx","$.data.requirements[1].currentVolume");
+     
+        AttNetworkRequest memory request = AttNetworkRequest({
+            url: "https://www.okx.com/v3/users/fee/trading-volume-progress?t=1736757319823",
+            header: "",
+            method: "GET",
+            body: ""
+            });
+        AttNetworkResponseResolve[] memory response = new AttNetworkResponseResolve[](1);
+        response[0] = AttNetworkResponseResolve({
+            keyName: "",
+            parseType: "",
+            parsePath: "$.data.requirements[1].currentVolume"
+        });
+        Attestor[] memory attestors = new Attestor[](1);
+        address addr = stringToAddress("0xe02bd7a6c8aa401189aebb5bad755c2610940a73");
+        attestors[0] = Attestor({
+            attestorAddr: addr,
+            url: "https://primuslabs.org"
+        });
+        bytes[] memory signas = new bytes[](1);
+        signas[0] = bytes("0x2fccc45102cd1b46b3da6543e75ab906c768f1c5bd5adf6d1cd9cd1b305e0609746a373e92c4295be2d9b5f3dcf8623c2e369698e964ed9c10d658250a0d2f211c");
+    
+        PrimusAttestation memory attestation = PrimusAttestation({
+            recipient: address(this),
+            request: request,
+            reponseResolve: response,
+            data: "",
+            attConditions: "[{\"op\":\">\",\"field\":\"$.data.requirements[1].currentVolume\"}]",
+            timestamp: uint64(block.timestamp),
+            additionParams: "",
+            attestors: attestors,
+            signatures: signas
+        });
+        vm.deal(address(this), 1 ether);
+        vm.expectEmit(true, true, true, true);
+        emit FeeReceived(address(this), submissionFee);
+
+        vm.expectRevert("Invalid value for the Attestation");
+        registry.submitAttestation{value: submissionFee}(attestation);
+    }
 
     function testFailSubmitAttestationInsufficientFee() public {
         AttNetworkRequest memory request = AttNetworkRequest({
