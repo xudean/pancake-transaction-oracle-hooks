@@ -23,7 +23,7 @@ contract BinExchangeVolumeHook is BinBaseHook, BaseFeeDiscountHook {
         return _hooksRegistrationBitmapFrom(
             Permissions({
                 beforeInitialize: false,
-                afterInitialize: false,
+                afterInitialize: true,
                 beforeMint: false,
                 afterMint: false,
                 beforeBurn: false,
@@ -38,6 +38,15 @@ contract BinExchangeVolumeHook is BinBaseHook, BaseFeeDiscountHook {
                 afterBurnReturnsDelta: false
             })
         );
+    }
+
+    function afterInitialize(address sender, PoolKey calldata key, uint24 activeId)
+        external
+        override
+        returns (bytes4)
+    {
+        poolManager.updateDynamicLPFee(key, getDefaultFee());
+        return (this.afterInitialize.selector);
     }
 
     function beforeSwap(address, PoolKey calldata key, bool, int128, bytes calldata)

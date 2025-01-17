@@ -3,20 +3,21 @@ pragma solidity ^0.8.24;
 
 import {MockERC20} from "solmate/src/test/utils/mocks/MockERC20.sol";
 import {Currency} from "pancake-v4-core/src/types/Currency.sol";
-import {CLPoolManager} from "pancake-v4-core/src/pool-cl/CLPoolManager.sol";
-import {CLPositionManager} from "pancake-v4-periphery/src/pool-cl/CLPositionManager.sol";
+import {BinPoolManager} from "pancake-v4-core/src/pool-bin/BinPoolManager.sol";
+import {BinPositionManager} from "pancake-v4-periphery/src/pool-bin/BinPositionManager.sol";
 import {UniversalRouter} from "pancake-v4-universal-router/src/UniversalRouter.sol";
 import {Constants} from "pancake-v4-core/test/pool-cl/helpers/Constants.sol";
 import {PoolKey} from "pancake-v4-core/src/types/PoolKey.sol";
 import {PoolIdLibrary} from "pancake-v4-core/src/types/PoolId.sol";
 import {IHooks} from "pancake-v4-core/src/interfaces/IHooks.sol";
-import {ICLRouterBase} from "pancake-v4-periphery/src/pool-cl/interfaces/ICLRouterBase.sol";
+import {IBinRouterBase} from "pancake-v4-periphery/src/pool-bin/interfaces/IBinRouterBase.sol";
 
-import {CLUtils} from "./utils/CLUtils.sol";
+import {BinUtils} from "./utils/BinUtils.sol";
 import {console} from "forge-std/console.sol";
 import "forge-std/Script.sol";
+import {BinPoolManager} from "pancake-v4-core/src/pool-bin/BinPoolManager.sol";
 
-contract TestBase is Script, CLUtils {
+contract TestBase is Script, BinUtils {
     using PoolIdLibrary for PoolKey;
 
     Currency currency0;
@@ -25,10 +26,10 @@ contract TestBase is Script, CLUtils {
     IHooks hook;
 
     function setUp() public {
-        address _poolManager = vm.envAddress("CL_POOL_MANAGER");
+        address _poolManager = vm.envAddress("BIN_POOL_MANAGER");
         console.log("_poolManager=%s", _poolManager);
 
-        address payable _positionManager = payable(vm.envAddress("CL_POSITION_MANAGER"));
+        address payable _positionManager = payable(vm.envAddress("BIN_POSITION_MANAGER"));
         console.log("_positionManager=%s", _positionManager);
         address _universalRouter = vm.envAddress("UNIVERSAL_ROUTER");
         console.log("_universalRouter=%s", _universalRouter);
@@ -38,11 +39,11 @@ contract TestBase is Script, CLUtils {
         address _token1 = vm.envAddress("TOKEN1");
         console.log("_token1=%s", _token1);
 
-        address _hook = vm.envAddress("CL_HOOK");
+        address _hook = vm.envAddress("BIN_HOOK");
         console.log("_hook=%s", _hook);
 
-        poolManager = CLPoolManager(_poolManager);
-        positionManager = CLPositionManager(_positionManager);
+        poolManager = BinPoolManager(_poolManager);
+        positionManager = BinPositionManager(_positionManager);
         universalRouter = UniversalRouter(payable(_universalRouter));
         currency0 = Currency.wrap(_token0);
         currency1 = Currency.wrap(_token1);
@@ -71,7 +72,7 @@ contract TestBase is Script, CLUtils {
 contract TestInitializeScript is TestBase {
     function _test() public override {
         console.log("init start!");
-        poolManager.initialize(key, Constants.SQRT_RATIO_1_1);
+        poolManager.initialize(key, BIN_ID_1_1);
         console.log("init end!");
     }
 }
@@ -86,10 +87,10 @@ contract TestSwapScript is TestBase {
     function _test() public override {
         MockERC20(Currency.unwrap(currency0)).mint(msg.sender, 0.01 ether);
         exactInputSingle(
-            ICLRouterBase.CLSwapExactInputSingleParams({
+            IBinRouterBase.BinSwapExactInputSingleParams({
                 poolKey: key,
-                zeroForOne: true,
-                amountIn: 0.01 ether,
+                swapForY: true,
+                amountIn: 0.01e18,
                 amountOutMinimum: 0,
                 hookData: new bytes(0)
             })

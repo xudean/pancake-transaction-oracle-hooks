@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {CLPoolManager} from "pancake-v4-core/src/pool-cl/CLPoolManager.sol";
+import {BinPoolManager} from "pancake-v4-core/src/pool-bin/BinPoolManager.sol";
 
-import {CLExchangeVolumeHook} from "../../src/pool-cl/volume/CLExchangeVolumeHook.sol";
+import {BinExchangeVolumeHook} from "../../src/pool-bin/volume/BinExchangeVolumeHook.sol";
 import {IAttestationRegistry} from "../../src/IAttestationRegistry.sol";
 
 import {console} from "forge-std/console.sol";
@@ -26,7 +26,7 @@ contract DeployHookScript is Script {
     }
 
     function _deploy() internal {
-        address _poolManager = vm.envAddress("CL_POOL_MANAGER");
+        address _poolManager = vm.envAddress("BIN_POOL_MANAGER");
         console.log("_poolManager=%s", _poolManager);
         address contractOwner = vm.envAddress("CONTRACT_OWNER");
         // Log
@@ -35,10 +35,10 @@ contract DeployHookScript is Script {
         // Log
         console.log("ATTESTATION_REGISTRY=%s", attestationRegistry);
 
-        CLPoolManager poolManager = CLPoolManager(_poolManager);
+        BinPoolManager poolManager = BinPoolManager(_poolManager);
         IAttestationRegistry iAttestationRegistry = IAttestationRegistry(attestationRegistry);
-        CLExchangeVolumeHook hook = new CLExchangeVolumeHook(poolManager, iAttestationRegistry, contractOwner);
-        console.log("CL_HOOK=%s", address(hook));
+        BinExchangeVolumeHook hook = new BinExchangeVolumeHook(poolManager, iAttestationRegistry, contractOwner);
+        console.log("BIN_HOOK=%s", address(hook));
     }
 }
 /*

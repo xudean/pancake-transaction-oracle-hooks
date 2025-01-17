@@ -34,13 +34,10 @@ abstract contract BaseFeeDiscountHook is Ownable {
     }
 
     function getFeeDiscount(address sender, PoolKey memory poolKey) internal view returns (uint24) {
-        if (!_checkAttestations(sender)) {
-            // no discount
-            return defaultFee | LPFeeLibrary.OVERRIDE_FEE_FLAG;
-        } else {
-            // There is a 50% discount on the handling fee for eligible attestation
+        if (_checkAttestations(sender)) {
             return (defaultFee / 2) | LPFeeLibrary.OVERRIDE_FEE_FLAG;
         }
+        return defaultFee;
     }
 
     /*
@@ -56,7 +53,7 @@ abstract contract BaseFeeDiscountHook is Ownable {
       @dev Get default fee
       @return uint24
      */
-    function getDefaultFee() external view returns (uint24) {
+    function getDefaultFee() public view returns (uint24) {
         return defaultFee;
     }
 
@@ -73,7 +70,7 @@ abstract contract BaseFeeDiscountHook is Ownable {
       @dev Get baseValue
       @return uint24
      */
-    function getBaseValue() external view returns (uint24) {
+    function getBaseValue() public view returns (uint24) {
         return baseValue;
     }
 
@@ -118,10 +115,10 @@ abstract contract BaseFeeDiscountHook is Ownable {
             Attestation memory attestation = attestations[i - 1];
             // Ensure attestation has a valid timestamp field
             if (
-                block.timestamp * 1000 - attestation.timestamp <= durationOfAttestation * 24 * 60 * 60 * 100
+                (block.timestamp - attestation.timestamp / 1000) <= durationOfAttestation * 24 * 60 * 60
                     && attestation.value >= baseValue
             ) {
-                return true; // Valid attestation found
+                return true;
             }
         }
         // No valid attestations found

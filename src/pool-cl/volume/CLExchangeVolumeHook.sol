@@ -24,7 +24,7 @@ contract CLExchangeVolumeHook is CLBaseHook, BaseFeeDiscountHook {
         return _hooksRegistrationBitmapFrom(
             Permissions({
                 beforeInitialize: false,
-                afterInitialize: false,
+                afterInitialize: true,
                 beforeAddLiquidity: false,
                 afterAddLiquidity: false,
                 beforeRemoveLiquidity: false,
@@ -39,6 +39,15 @@ contract CLExchangeVolumeHook is CLBaseHook, BaseFeeDiscountHook {
                 afterRemoveLiquidityReturnsDelta: false
             })
         );
+    }
+
+    function afterInitialize(address sender, PoolKey calldata key, uint160 sqrtPriceX96, int24 tick)
+        external
+        override
+        returns (bytes4)
+    {
+        poolManager.updateDynamicLPFee(key, getDefaultFee());
+        return (this.afterInitialize.selector);
     }
 
     function beforeSwap(address sender, PoolKey calldata key, ICLPoolManager.SwapParams calldata, bytes calldata)
