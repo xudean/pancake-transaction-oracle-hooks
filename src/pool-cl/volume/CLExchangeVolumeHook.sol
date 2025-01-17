@@ -24,8 +24,8 @@ contract CLExchangeVolumeHook is CLBaseHook, BaseFeeDiscountHook {
         return _hooksRegistrationBitmapFrom(
             Permissions({
                 beforeInitialize: false,
-                afterInitialize: false,
-                beforeAddLiquidity: true,
+                afterInitialize: true,
+                beforeAddLiquidity: false,
                 afterAddLiquidity: false,
                 beforeRemoveLiquidity: false,
                 afterRemoveLiquidity: false,
@@ -41,15 +41,13 @@ contract CLExchangeVolumeHook is CLBaseHook, BaseFeeDiscountHook {
         );
     }
 
-    function beforeAddLiquidity(
-        address sender,
-        PoolKey calldata key,
-        ICLPoolManager.ModifyLiquidityParams calldata,
-        bytes calldata
-    ) external override poolManagerOnly returns (bytes4) {
-        emit BeforeAddLiquidity(sender);
-
-        return this.beforeAddLiquidity.selector;
+    function afterInitialize(address sender, PoolKey calldata key, uint160 sqrtPriceX96, int24 tick)
+        external
+        override
+        returns (bytes4)
+    {
+        poolManager.updateDynamicLPFee(key, getDefaultFee());
+        return (this.afterInitialize.selector);
     }
 
     function beforeSwap(address sender, PoolKey calldata key, ICLPoolManager.SwapParams calldata, bytes calldata)
@@ -59,11 +57,6 @@ contract CLExchangeVolumeHook is CLBaseHook, BaseFeeDiscountHook {
         returns (bytes4, BeforeSwapDelta, uint24)
     {
         uint24 fee = getFeeDiscount(tx.origin, key);
-        emit BeforeSwap(sender);
         return (this.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee);
-    }
-
-    function getAttestationRegistry() external view returns (IAttestationRegistry) {
-        return iAttestationRegistry;
     }
 }

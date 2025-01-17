@@ -71,7 +71,7 @@ Add/replace the above address in `.env`.
 
 ```sh
 source .env
-forge script script/DeployHook.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+forge script script/pool-cl/DeployHook.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
 ```
 
 output (sample):
@@ -89,7 +89,7 @@ Add/replace the above address in `.env`.
 
 ```sh
 source .env
-forge script script/Test.s.sol:TestInitializeScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+forge script script/pool-cl/Test.s.sol:TestInitializeScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
 ```
 
 This command only needs to be executed once.
@@ -124,7 +124,7 @@ forge script script/Approve.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY 
 
 ```sh
 source .env
-forge script script/Test.s.sol:TestAddLiquidityScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+forge script script/pool-cl/Test.s.sol:TestAddLiquidityScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
 ```
 
 <br/>
@@ -133,5 +133,5 @@ forge script script/Test.s.sol:TestAddLiquidityScript --rpc-url $RPC_URL --priva
 
 ```sh
 source .env
-forge script script/Test.s.sol:TestSwapScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+forge script script/pool-cl/Test.s.sol:TestSwapScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
 ```

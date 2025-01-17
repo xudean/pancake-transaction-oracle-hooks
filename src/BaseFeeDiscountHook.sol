@@ -23,23 +23,21 @@ abstract contract BaseFeeDiscountHook is Ownable {
 
     uint24 private baseValue = 10000;
 
+    uint24 private durationOfAttestation = 7;
+
     // mapping(PoolId => uint24) public poolFeeMapping;
     // AttestationRegistry
     IAttestationRegistry internal iAttestationRegistry;
 
     constructor(IAttestationRegistry _iAttestationRegistry, address initialOwner) Ownable(initialOwner) {
         iAttestationRegistry = _iAttestationRegistry;
-        _transferOwnership(initialOwner);
     }
 
     function getFeeDiscount(address sender, PoolKey memory poolKey) internal view returns (uint24) {
-        if (!_checkAttestations(sender)) {
-            // no discount
-            return defaultFee | LPFeeLibrary.OVERRIDE_FEE_FLAG;
-        } else {
-            // There is a 50% discount on the handling fee for eligible attestation
+        if (_checkAttestations(sender)) {
             return (defaultFee / 2) | LPFeeLibrary.OVERRIDE_FEE_FLAG;
         }
+        return defaultFee;
     }
 
     /*
@@ -55,7 +53,7 @@ abstract contract BaseFeeDiscountHook is Ownable {
       @dev Get default fee
       @return uint24
      */
-    function getDefaultFee() external view returns (uint24) {
+    function getDefaultFee() public view returns (uint24) {
         return defaultFee;
     }
 
@@ -72,8 +70,33 @@ abstract contract BaseFeeDiscountHook is Ownable {
       @dev Get baseValue
       @return uint24
      */
-    function getBaseValue() external view returns (uint24) {
+    function getBaseValue() public view returns (uint24) {
         return baseValue;
+    }
+
+    /*
+      @dev Set durationOfAttestation
+      @param _durationOfAttestation
+      @return
+     */
+    function setDurationOfAttestation(uint24 _durationOfAttestation) external onlyOwner {
+        durationOfAttestation = _durationOfAttestation;
+    }
+
+    /*
+      @dev Get durationOfAttestation
+      @return uint24
+     */
+    function getDurationOfAttestation() external view returns (uint24) {
+        return durationOfAttestation;
+    }
+
+    /*
+      @dev Get attestationRegistry
+      @return IAttestationRegistry
+     */
+    function getAttestationRegistry() external view returns (IAttestationRegistry) {
+        return iAttestationRegistry;
     }
 
     /*
@@ -91,8 +114,11 @@ abstract contract BaseFeeDiscountHook is Ownable {
         for (uint256 i = attestations.length; i > 0; i--) {
             Attestation memory attestation = attestations[i - 1];
             // Ensure attestation has a valid timestamp field
-            if (block.timestamp - attestation.timestamp <= 7 days && attestation.value >= baseValue) {
-                return true; // Valid attestation found
+            if (
+                (block.timestamp - attestation.timestamp / 1000) <= durationOfAttestation * 24 * 60 * 60
+                    && attestation.value >= baseValue
+            ) {
+                return true;
             }
         }
         // No valid attestations found
