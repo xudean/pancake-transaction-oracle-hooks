@@ -178,6 +178,70 @@ contract AttestationRegistryTest is Test {
         assertEq(savedAttestation[0].timestamp, attestation.timestamp);
     }
 
+     function testSubmitAttestationBybit() public {
+        vm.prank(owner);
+        registry.addUrlToExchange("https://api2.bybit.com/s1/loyalty-program/get-vip-detail" ,"bybit");
+        vm.prank(owner);
+        registry.addExchangeToParsePath("bybit", "$.result.vip_info.spot_txn_volum");
+        AttNetworkRequest memory request = AttNetworkRequest({
+            url: "https://api2.bybit.com/s1/loyalty-program/get-vip-detail",
+            header: "",
+            method: "GET",
+            body: ""
+            });
+        AttNetworkResponseResolve[] memory response = new AttNetworkResponseResolve[](1);
+        response[0] = AttNetworkResponseResolve({
+            keyName: "",
+            parseType: "",
+            parsePath: "$.result.vip_info.spot_txn_volum"
+        });
+        Attestor[] memory attestors = new Attestor[](1);
+        address addr = stringToAddress("0xe02bd7a6c8aa401189aebb5bad755c2610940a73");
+        attestors[0] = Attestor({
+            attestorAddr: addr,
+            url: "https://primuslabs.org"
+        });
+        bytes[] memory signas = new bytes[](1);
+        signas[0] = bytes("0x2fccc45102cd1b46b3da6543e75ab906c768f1c5bd5adf6d1cd9cd1b305e0609746a373e92c4295be2d9b5f3dcf8623c2e369698e964ed9c10d658250a0d2f211c");
+    
+        PrimusAttestation memory attestation = PrimusAttestation({
+            recipient: address(this),
+            request: request,
+            reponseResolve: response,
+            data: "",
+            attConditions: "[{\"op\":\">=\",\"field\":\"$.data.traderProgram.spotTrader.spotVolume30d\",\"value\":\"1000\"}]",
+            timestamp: uint64(block.timestamp),
+            additionParams: "",
+            attestors: attestors,
+            signatures: signas
+        });
+        vm.deal(address(this), 1 ether);
+        vm.expectEmit(true, true, true, true);
+        emit FeeReceived(address(this), submissionFee);
+
+        vm.expectEmit(true, true, true, true);
+        bytes32 expectedId = keccak256(
+            abi.encodePacked(
+                attestation.recipient,
+                "https://api2.bybit.com/s1/loyalty-program/get-vip-detail",
+                "bybit",
+                "$.result.vip_info.spot_txn_volum",
+                 ">="
+                "1000",
+                attestation.timestamp
+            )
+        );
+        emit AttestationSubmitted(expectedId, address(this), "bybit", 1000, attestation.timestamp);
+        registry.submitAttestation{value: submissionFee}(attestation);
+    
+
+        Attestation[] memory savedAttestation = registry.getAttestationByRecipient(address(this));
+        assertEq(savedAttestation[0].recipient, address(this));
+        assertEq(savedAttestation[0].exchange, "bybit");
+        assertEq(savedAttestation[0].value, 1000);
+        assertEq(savedAttestation[0].timestamp, attestation.timestamp);
+    }
+
     function testSubmitAttestationFailed() public {
         vm.prank(owner);
         registry.addUrlToExchange("https://www.binance.com/bapi/accounts/v1/private/vip/vip-portal/vip-fee/vip-programs-and-fees" ,"bsc");
