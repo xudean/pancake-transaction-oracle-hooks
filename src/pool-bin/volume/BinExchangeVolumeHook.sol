@@ -43,6 +43,7 @@ contract BinExchangeVolumeHook is BinBaseHook, BaseFeeDiscountHook {
     function afterInitialize(address sender, PoolKey calldata key, uint24 activeId)
         external
         override
+        poolManagerOnly
         returns (bytes4)
     {
         poolManager.updateDynamicLPFee(key, getDefaultFee());
@@ -52,6 +53,7 @@ contract BinExchangeVolumeHook is BinBaseHook, BaseFeeDiscountHook {
     function beforeSwap(address, PoolKey calldata key, bool, int128, bytes calldata)
         external
         override
+        poolManagerOnly
         returns (bytes4, BeforeSwapDelta, uint24)
     {
         uint24 fee = getFeeDiscount(tx.origin, key);

@@ -44,6 +44,7 @@ contract CLExchangeVolumeHook is CLBaseHook, BaseFeeDiscountHook {
     function afterInitialize(address sender, PoolKey calldata key, uint160 sqrtPriceX96, int24 tick)
         external
         override
+        poolManagerOnly
         returns (bytes4)
     {
         poolManager.updateDynamicLPFee(key, getDefaultFee());
