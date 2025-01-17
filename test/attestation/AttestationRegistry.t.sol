@@ -26,7 +26,7 @@ contract AttestationRegistryTest is Test {
 
     function testAddUrlToExchange() public {
         vm.prank(owner);
-        registry.addUrlToExchange("https://example.com", "ExampleExchange","json/path");
+        registry.addUrlToCexInfo("https://example.com", "ExampleExchange","json/path");
         CexInfo memory info = registry.getCexInfoDetail("https://example.com");
         assertEq(info.cexName, "ExampleExchange");
     }
@@ -44,16 +44,16 @@ contract AttestationRegistryTest is Test {
 
     function testRemoveUrlToExchange() public {
         vm.prank(owner);
-        registry.addUrlToExchange("https://example.com", "ExampleExchange","json/path");
+        registry.addUrlToCexInfo("https://example.com", "ExampleExchange","json/path");
         vm.prank(owner);
-        registry.removeUrlToExchange("https://example.com");
+        registry.removeUrlToCexInfo("https://example.com");
         vm.expectRevert("URL not found");
         registry.getCexInfoDetail("https://example.com");
     }
 
     function testSubmitAttestation() public {
         vm.prank(owner);
-        registry.addUrlToExchange("https://www.okx.com/v3/users/fee/trading-volume-progress", "okx","$.data.requirements[1].currentVolume");
+        registry.addUrlToCexInfo("https://www.okx.com/v3/users/fee/trading-volume-progress", "okx","$.data.requirements[1].currentVolume");
      
         AttNetworkRequest memory request = AttNetworkRequest({
             url: "https://www.okx.com/v3/users/fee/trading-volume-progress?t=1736757319823",
@@ -107,7 +107,7 @@ contract AttestationRegistryTest is Test {
 
      function testSubmitAttestationBinance() public {
         vm.prank(owner);
-        registry.addUrlToExchange("https://www.binance.com/bapi/accounts/v1/private/vip/vip-portal/vip-fee/vip-programs-and-fees" ,"binance","$.data.traderProgram.spotTrader.spotVolume30d");
+        registry.addUrlToCexInfo("https://www.binance.com/bapi/accounts/v1/private/vip/vip-portal/vip-fee/vip-programs-and-fees" ,"binance","$.data.traderProgram.spotTrader.spotVolume30d");
         AttNetworkRequest memory request = AttNetworkRequest({
             url: "https://www.binance.com/bapi/accounts/v1/private/vip/vip-portal/vip-fee/vip-programs-and-fees",
             header: "",
@@ -158,7 +158,7 @@ contract AttestationRegistryTest is Test {
 
      function testSubmitAttestationBybit() public {
         vm.prank(owner);
-        registry.addUrlToExchange("https://api2.bybit.com/s1/loyalty-program/get-vip-detail" ,"bybit","$.result.vip_info.spot_txn_volum");
+        registry.addUrlToCexInfo("https://api2.bybit.com/s1/loyalty-program/get-vip-detail" ,"bybit","$.result.vip_info.spot_txn_volum");
         
         AttNetworkRequest memory request = AttNetworkRequest({
             url: "https://api2.bybit.com/s1/loyalty-program/get-vip-detail",
@@ -210,7 +210,7 @@ contract AttestationRegistryTest is Test {
 
     function testSubmitAttestationFailed() public {
         vm.prank(owner);
-        registry.addUrlToExchange("https://www.binance.com/bapi/accounts/v1/private/vip/vip-portal/vip-fee/vip-programs-and-fees" ,"binance","$.data.traderProgram.spotTrader.spotVolume30d");
+        registry.addUrlToCexInfo("https://www.binance.com/bapi/accounts/v1/private/vip/vip-portal/vip-fee/vip-programs-and-fees" ,"binance","$.data.traderProgram.spotTrader.spotVolume30d");
         AttNetworkRequest memory request = AttNetworkRequest({
             url: "https://www.binance.com/bapi/accounts/v1/private/vip/vip-portal/vip-fee/vip-programs-and-fees",
             header: "",
@@ -291,7 +291,7 @@ contract AttestationRegistryTest is Test {
 
     function testGetAttestationByRecipient() public {
         vm.prank(owner);
-        registry.addUrlToExchange("https://example.com", "ExampleExchange","path/to/parse");
+        registry.addUrlToCexInfo("https://example.com", "ExampleExchange","path/to/parse");
         
         AttNetworkRequest memory request = AttNetworkRequest({
             url: "https://example.com",

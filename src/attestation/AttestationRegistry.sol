@@ -31,13 +31,13 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
     address payable public feeRecipient;
 
     // AttestationSubmitted event
-    event AttestationSubmitted(address recipient, string exchange, uint256 value, uint256 timestamp);
+    event AttestationSubmitted(address recipient, string cexName, uint256 value, uint256 timestamp);
     // fee received event
     event FeeReceived(address sender, uint256 amount);
-    // url to exchange added event
-    event UrlToExchangeAdded(string indexed url, string exchange);
-    // url to exchange removed event
-    event UrlToExchangeRemoved(string indexed url);
+    // cexUrl to cexName added event
+    event UrlToCexInfoAdded(string indexed cexUrl, string cexName);
+    // cexUrl to cexName removed event
+    event UrlToCexInfoRemoved(string indexed cexUrl);
 
     /**
      *  @dev Constructor
@@ -52,12 +52,12 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
     }
 
     /**
-     *  @dev setCexCheckListAndJsonPath
-     *  @param _cexUrls The dexUrls
-     *  @param _cexName The dexName
+     *  @dev setCexAndJsonPath
+     *  @param _cexUrls The cexUrls
+     *  @param _cexName The cexName
      *  @param _jsonPath The jsonPath
      */
-    function setCexCheckListAndJsonPath(string[] memory _cexUrls, string[] memory _cexName, string[] memory _jsonPath) external onlyOwner {
+    function setCexAndJsonPath(string[] memory _cexUrls, string[] memory _cexName, string[] memory _jsonPath) external onlyOwner {
         require(_cexUrls.length == _cexName.length && _cexName.length == _jsonPath.length, "Array length mismatch");
         for (uint256 i = 0; i < _cexUrls.length; ++i) {
             cexInfoMapping[_cexUrls[i]] = CexInfo({cexName: _cexName[i], parsePath: _jsonPath[i]});
@@ -77,22 +77,22 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
     /**
      * @dev Add or update the mapping of URL to exchange name and parsePath
      * @param _cexUrl The URL address
-     * @param _cexName The exchange name
+     * @param _cexName The cex name such as "binance" "okx" etc.
      * @param _jsonPath The parsing path
      */
-    function addUrlToExchange(string memory _cexUrl, string memory _cexName, string memory _jsonPath) external onlyOwner {
+    function addUrlToCexInfo(string memory _cexUrl, string memory _cexName, string memory _jsonPath) external onlyOwner {
         cexInfoMapping[_cexUrl] = CexInfo({cexName: _cexName, parsePath: _jsonPath});
-        emit UrlToExchangeAdded(_cexUrl, _cexName);
+        emit UrlToCexInfoAdded(_cexUrl, _cexName);
     }
 
     /**
-     * @dev Remove the mapping of URL to exchange name
+     * @dev Remove the mapping of URL to cex info
      * @param _cexUrl The URL address
      */
-    function removeUrlToExchange(string memory _cexUrl) external onlyOwner {
+    function removeUrlToCexInfo(string memory _cexUrl) external onlyOwner {
         require(bytes(cexInfoMapping[_cexUrl].cexName).length > 0, "URL not found");
         delete cexInfoMapping[_cexUrl];
-        emit UrlToExchangeRemoved(_cexUrl);
+        emit UrlToCexInfoRemoved(_cexUrl);
     }
 
     /**
@@ -122,7 +122,7 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
         // verify the parsePath is valid
         require(
             keccak256(bytes(cexInfo.parsePath)) == keccak256(bytes(_attestation.reponseResolve[0].parsePath)),
-            "Invalid parsePath for the exchange"
+            "Invalid parsePath for the expected cex parsePath"
         );
 
         // verify the value is valid
@@ -148,6 +148,7 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
      * @return Attestation[] memory
      */
     function getAttestationByRecipient(address recipient) public view returns (Attestation[] memory) {
+        require(recipient!= address(0), "Invalid address");
         return attestationsOfAddress[recipient];
     }
 
