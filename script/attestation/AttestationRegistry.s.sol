@@ -35,9 +35,9 @@ contract DeployAttestationRegistry is Script {
         string[] memory cexNames = new string[](4);
         cexNames[0] = "okx";
         cexNames[1] = "bitget";
-        cexNames[2] = "bsc";
+        cexNames[2] = "binance";
         cexNames[3] = "bybit";
-        attestationRegistry.setCexCheckListAndJsonPath(cexUrls,cexNames,cexJsonPaths);
+        attestationRegistry.setCexAndJsonPath(cexUrls,cexNames,cexJsonPaths);
 
         console.log("AttestationRegistry deployed at:", address(attestationRegistry));
 

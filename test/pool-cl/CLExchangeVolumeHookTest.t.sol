@@ -35,7 +35,6 @@ contract CLExchangeVolumeHookTest is Test {
         console.log("clPoolManager:", address(clPoolManager));
         // Create an attestation and add it to the registry
         Attestation memory attestation = Attestation({
-            attestationId: keccak256(abi.encodePacked("1")), // Generate a unique ID
             recipient: address(clPoolManager),
             exchange: "binance",
             value: 100000,
