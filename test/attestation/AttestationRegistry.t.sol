@@ -51,7 +51,7 @@ contract AttestationRegistryTest is Test {
         registry.getCexInfoDetail("https://example.com");
     }
 
-    function testSubmitAttestation() public {
+    function testSubmitAttestationOkx() public {
         vm.prank(owner);
         registry.addUrlToCexInfo("https://www.okx.com/v3/users/fee/trading-volume-progress", "okx","$.data.requirements[1].currentVolume");
      

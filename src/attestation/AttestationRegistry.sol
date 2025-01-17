@@ -21,7 +21,7 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
     using UintString for string;
     // Attestation with address mapping
     mapping(address => Attestation[]) public attestationsOfAddress;
-    // Cex info mapping url => CexInfo
+    // Cex info mapping cex url => CexInfo
     mapping(string => CexInfo) public cexInfoMapping;
     // IPrimusZKTLS contract    
     IPrimusZKTLS internal primusZKTLS;
@@ -53,20 +53,20 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
 
     /**
      *  @dev setCexAndJsonPath
-     *  @param _cexUrls The cexUrls
-     *  @param _cexName The cexName
-     *  @param _jsonPath The jsonPath
+     *  @param _cexUrls The cex URL addresses
+     *  @param _cexNames The cex names such as "binance" "okx" etc.
+     *  @param _jsonPaths The json paths
      */
-    function setCexAndJsonPath(string[] memory _cexUrls, string[] memory _cexName, string[] memory _jsonPath) external onlyOwner {
-        require(_cexUrls.length == _cexName.length && _cexName.length == _jsonPath.length, "Array length mismatch");
+    function setCexAndJsonPath(string[] memory _cexUrls, string[] memory _cexNames, string[] memory _jsonPaths) external onlyOwner {
+        require(_cexUrls.length == _cexNames.length && _cexNames.length == _jsonPaths.length, "Array length mismatch");
         for (uint256 i = 0; i < _cexUrls.length; ++i) {
-            cexInfoMapping[_cexUrls[i]] = CexInfo({cexName: _cexName[i], parsePath: _jsonPath[i]});
+            cexInfoMapping[_cexUrls[i]] = CexInfo({cexName: _cexNames[i], parsePath: _jsonPaths[i]});
         }
     }
 
     /**
     *  @dev getCexInfoDetail
-    *  @param _cexUrl The cexUrl
+    *  @param _cexUrl The cex URL address
     *  @return CexInfo
     * */
     function getCexInfoDetail(string memory _cexUrl) external view returns (CexInfo memory) {
@@ -76,7 +76,7 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
 
     /**
      * @dev Add or update the mapping of URL to exchange name and parsePath
-     * @param _cexUrl The URL address
+     * @param _cexUrl The cex URL address
      * @param _cexName The cex name such as "binance" "okx" etc.
      * @param _jsonPath The parsing path
      */
@@ -87,7 +87,7 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
 
     /**
      * @dev Remove the mapping of URL to cex info
-     * @param _cexUrl The URL address
+     * @param _cexUrl The cex URL address
      */
     function removeUrlToCexInfo(string memory _cexUrl) external onlyOwner {
         require(bytes(cexInfoMapping[_cexUrl].cexName).length > 0, "URL not found");
