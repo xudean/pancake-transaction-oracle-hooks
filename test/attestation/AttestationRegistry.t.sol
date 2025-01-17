@@ -4,6 +4,8 @@ pragma solidity ^0.8.24;
 import "forge-std/Test.sol";
 import "../../src/attestation/AttestationRegistry.sol";
 import "../../src/types/Common.sol";
+
+import {CexInfo} from "../../src/attestation/AttestationRegistry.sol";
 import {Attestation as PrimusAttestation, AttNetworkRequest, AttNetworkResponseResolve, Attestor, IPrimusZKTLS} from "zkTLS-contracts/src/IPrimusZKTLS.sol";
 
 contract AttestationRegistryTest is Test {
@@ -14,7 +16,7 @@ contract AttestationRegistryTest is Test {
     uint256 private submissionFee = 0.01 ether;
 
     event FeeReceived(address sender, uint256 amount);
-    event AttestationSubmitted(bytes32 attestationId, address recipient, string exchange, uint256 value, uint256 timestamp);
+    event AttestationSubmitted(address recipient, string exchange, uint256 value, uint256 timestamp);
 
     function setUp() public {
         primusZKTLSMock = IPrimusZKTLS(address(new MockPrimusZKTLS()));
@@ -24,8 +26,9 @@ contract AttestationRegistryTest is Test {
 
     function testAddUrlToExchange() public {
         vm.prank(owner);
-        registry.addUrlToExchange("https://example.com", "ExampleExchange");
-        assertEq(registry.cexCheckList("https://example.com"), "ExampleExchange");
+        registry.addUrlToExchange("https://example.com", "ExampleExchange","json/path");
+        CexInfo memory info = registry.getCexInfoDetail("https://example.com");
+        assertEq(info.cexName, "ExampleExchange");
     }
 
     function stringToAddress(string memory _addressString) public pure returns (address) {
@@ -41,17 +44,16 @@ contract AttestationRegistryTest is Test {
 
     function testRemoveUrlToExchange() public {
         vm.prank(owner);
-        registry.addUrlToExchange("https://example.com", "ExampleExchange");
+        registry.addUrlToExchange("https://example.com", "ExampleExchange","json/path");
         vm.prank(owner);
         registry.removeUrlToExchange("https://example.com");
-        assertEq(bytes(registry.cexCheckList("https://example.com")).length, 0);
+        CexInfo memory info = registry.getCexInfoDetail("https://example.com");
+        assertEq(info.cexName, "");
     }
 
     function testSubmitAttestation() public {
         vm.prank(owner);
-        registry.addUrlToExchange("https://www.okx.com/v3/users/fee/trading-volume-progress", "okx");
-        vm.prank(owner);
-        registry.addExchangeToParsePath("okx", "$.data.requirements[1].currentVolume");
+        registry.addUrlToExchange("https://www.okx.com/v3/users/fee/trading-volume-progress", "okx","$.data.requirements[1].currentVolume");
      
         AttNetworkRequest memory request = AttNetworkRequest({
             url: "https://www.okx.com/v3/users/fee/trading-volume-progress?t=1736757319823",
@@ -91,18 +93,7 @@ contract AttestationRegistryTest is Test {
 
  
         vm.expectEmit(true, true, true, true);
-        bytes32 expectedId = keccak256(
-            abi.encodePacked(
-                attestation.recipient,
-                "https://www.okx.com/v3/users/fee/trading-volume-progress?t=1736757319823",
-                "okx",
-                "$.data.requirements[1].currentVolume",
-                 ">",
-                "100",
-                attestation.timestamp
-            )
-        );
-        emit AttestationSubmitted(expectedId, address(this), "okx", 100, attestation.timestamp);
+        emit AttestationSubmitted(address(this), "okx", 100, attestation.timestamp);
       
         registry.submitAttestation{value: submissionFee}(attestation);
   
@@ -114,11 +105,9 @@ contract AttestationRegistryTest is Test {
         assertEq(savedAttestation[0].timestamp, attestation.timestamp);
     }
 
-     function testSubmitAttestation1() public {
+     function testSubmitAttestationBinance() public {
         vm.prank(owner);
-        registry.addUrlToExchange("https://www.binance.com/bapi/accounts/v1/private/vip/vip-portal/vip-fee/vip-programs-and-fees" ,"bsc");
-        vm.prank(owner);
-        registry.addExchangeToParsePath("bsc", "$.data.traderProgram.spotTrader.spotVolume30d");
+        registry.addUrlToExchange("https://www.binance.com/bapi/accounts/v1/private/vip/vip-portal/vip-fee/vip-programs-and-fees" ,"binance","$.data.traderProgram.spotTrader.spotVolume30d");
         AttNetworkRequest memory request = AttNetworkRequest({
             url: "https://www.binance.com/bapi/accounts/v1/private/vip/vip-portal/vip-fee/vip-programs-and-fees",
             header: "",
@@ -156,33 +145,21 @@ contract AttestationRegistryTest is Test {
         emit FeeReceived(address(this), submissionFee);
 
         vm.expectEmit(true, true, true, true);
-        bytes32 expectedId = keccak256(
-            abi.encodePacked(
-                attestation.recipient,
-                "https://www.binance.com/bapi/accounts/v1/private/vip/vip-portal/vip-fee/vip-programs-and-fees",
-                "bsc",
-                "$.data.traderProgram.spotTrader.spotVolume30d",
-                 ">="
-                "1000",
-                attestation.timestamp
-            )
-        );
-        emit AttestationSubmitted(expectedId, address(this), "bsc", 1000, attestation.timestamp);
+        emit AttestationSubmitted(address(this), "binance", 1000, attestation.timestamp);
         registry.submitAttestation{value: submissionFee}(attestation);
     
 
         Attestation[] memory savedAttestation = registry.getAttestationByRecipient(address(this));
         assertEq(savedAttestation[0].recipient, address(this));
-        assertEq(savedAttestation[0].exchange, "bsc");
+        assertEq(savedAttestation[0].exchange, "binance");
         assertEq(savedAttestation[0].value, 1000);
         assertEq(savedAttestation[0].timestamp, attestation.timestamp);
     }
 
      function testSubmitAttestationBybit() public {
         vm.prank(owner);
-        registry.addUrlToExchange("https://api2.bybit.com/s1/loyalty-program/get-vip-detail" ,"bybit");
-        vm.prank(owner);
-        registry.addExchangeToParsePath("bybit", "$.result.vip_info.spot_txn_volum");
+        registry.addUrlToExchange("https://api2.bybit.com/s1/loyalty-program/get-vip-detail" ,"bybit","$.result.vip_info.spot_txn_volum");
+        
         AttNetworkRequest memory request = AttNetworkRequest({
             url: "https://api2.bybit.com/s1/loyalty-program/get-vip-detail",
             header: "",
@@ -220,18 +197,7 @@ contract AttestationRegistryTest is Test {
         emit FeeReceived(address(this), submissionFee);
 
         vm.expectEmit(true, true, true, true);
-        bytes32 expectedId = keccak256(
-            abi.encodePacked(
-                attestation.recipient,
-                "https://api2.bybit.com/s1/loyalty-program/get-vip-detail",
-                "bybit",
-                "$.result.vip_info.spot_txn_volum",
-                 ">="
-                "1000",
-                attestation.timestamp
-            )
-        );
-        emit AttestationSubmitted(expectedId, address(this), "bybit", 1000, attestation.timestamp);
+        emit AttestationSubmitted(address(this), "bybit", 1000, attestation.timestamp);
         registry.submitAttestation{value: submissionFee}(attestation);
     
 
@@ -244,9 +210,7 @@ contract AttestationRegistryTest is Test {
 
     function testSubmitAttestationFailed() public {
         vm.prank(owner);
-        registry.addUrlToExchange("https://www.binance.com/bapi/accounts/v1/private/vip/vip-portal/vip-fee/vip-programs-and-fees" ,"bsc");
-        vm.prank(owner);
-        registry.addExchangeToParsePath("bsc", "$.data.traderProgram.spotTrader.spotVolume30d");
+        registry.addUrlToExchange("https://www.binance.com/bapi/accounts/v1/private/vip/vip-portal/vip-fee/vip-programs-and-fees" ,"binance","$.data.traderProgram.spotTrader.spotVolume30d");
         AttNetworkRequest memory request = AttNetworkRequest({
             url: "https://www.binance.com/bapi/accounts/v1/private/vip/vip-portal/vip-fee/vip-programs-and-fees",
             header: "",
@@ -327,10 +291,9 @@ contract AttestationRegistryTest is Test {
 
     function testGetAttestationByRecipient() public {
         vm.prank(owner);
-        registry.addUrlToExchange("https://example.com", "ExampleExchange");
-        vm.prank(owner);
-        registry.addExchangeToParsePath("ExampleExchange", "path/to/parse");
-         AttNetworkRequest memory request = AttNetworkRequest({
+        registry.addUrlToExchange("https://example.com", "ExampleExchange","path/to/parse");
+        
+        AttNetworkRequest memory request = AttNetworkRequest({
             url: "https://example.com",
             header: "",
             method: "GET",
@@ -357,11 +320,11 @@ contract AttestationRegistryTest is Test {
         });
         vm.deal(address(this), 1 ether);
 
-        bytes32 attestationId = registry.submitAttestation{value: submissionFee}(attestation);
-
+        bool flag = registry.submitAttestation{value: submissionFee}(attestation);
+        assertEq(flag, true);
         Attestation[] memory attestations = registry.getAttestationByRecipient(address(this));
         assertEq(attestations.length, 1);
-        assertEq(attestations[0].attestationId, attestationId);
+        assertEq(attestations[0].exchange, "ExampleExchange");
     }
 }
 
