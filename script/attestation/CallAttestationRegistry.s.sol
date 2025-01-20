@@ -7,11 +7,12 @@ import {AttestationRegistry} from "src/attestation/AttestationRegistry.sol";
 contract CallAttestationRegistry is Script {
     function run() public {
         uint256 senderPrivateKey = vm.envUint("PRIVATE_KEY");
-        //address senderAddress = vm.addr(senderPrivateKey);
+        address attestationRegistryAddr = vm.envAddress("ATTESTATION_REGISTRY");
+        address primusAddr = vm.envAddress("PRIMUS_ZKTLS");
         vm.startBroadcast(senderPrivateKey);
 
-        AttestationRegistry attReg = AttestationRegistry(address(0x9109Ea5A8Af5c3c5600F6E8213bd83348C81a573));
-        attReg.setPrimusZKTLS(address(0x6F6120c4A784641D882306900945877cdce726A0));
+        AttestationRegistry attReg = AttestationRegistry(address(attestationRegistryAddr));
+        attReg.setPrimusZKTLS(primusAddr);
 
         vm.stopBroadcast();
     }
