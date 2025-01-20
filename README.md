@@ -31,16 +31,21 @@ forge build
 
 The [AttestationRegistry](src/attestation/AttestationRegistry.sol) contract is used to register the attestation contract.
 
-![AttestationRegistry Contract](./docs/src/src/attestation/AttestationRegistry.sol/contract.AttestationRegistry.md)
+[AttestationRegistry Contract](./docs/src/src/attestation/AttestationRegistry.sol/contract.AttestationRegistry.md)
 
 
 
-## Transaction Oracle Hooks
+## BaseFeeDiscountHook
 
-The [Transaction Oracle Hooks](src/pool-cl/volume/CLTransactionOracleHook.solk.sol) implements the `beforeAddLiquidity` and `beforeSwap` hooks.
+The [BaseFeeDiscountHook](src/pool-cl/volume/CLBaseFeeDiscountHook.solk.sol) implements the `beforeAddLiquidity` and `beforeSwap` hooks.
 
-![Transaction Oracle Hooks Contract](./docs/class/CLTransactionOracleHook.svg)
+[BaseFeeDiscountHook Contract](./docs/src/src/BaseFeeDiscountHook.sol/contract.BaseFeeDiscountHook.md)
 
+## CLBaseHook
+
+The [CLBaseHook](src/pool-cl/volume/CLBaseHook.solk.sol) implements the `beforeAddLiquidity` and `beforeSwap` hooks.
+
+[CLBaseHook Contract](./docs/src/src/CLBaseHook.sol/contract.CLBaseHook.md)
 
 ## BSC-Testnet
 
