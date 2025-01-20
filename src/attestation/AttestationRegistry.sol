@@ -51,6 +51,33 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
         feeRecipient = _feeRecipient;
     }
 
+
+    /**
+     *  @dev set IPrimusZKTLS contract instance
+     *  @param _primusZKTLS The address of the IPrimusZKTLS contract
+     * 
+     * */ 
+    function setPrimusZKTLS(address _primusZKTLS) public onlyOwner {
+        primusZKTLS = IPrimusZKTLS(_primusZKTLS);
+    }
+
+    /**
+     *  @dev set submissionFee 
+     *  @param _submissionFee The submission fee
+     * 
+     * */  
+    function setSubmissionFee(uint256 _submissionFee) public onlyOwner {
+        submissionFee = _submissionFee;
+    }
+
+    /**
+     * @dev set feeRecipient
+     * @param _feeRecipient The fee recipient
+     * */ 
+    function setFeeRecipient(address payable _feeRecipient) public onlyOwner {
+        feeRecipient = _feeRecipient;
+    }
+
     /**
      *  @dev setCexAndJsonPath
      *  @param _cexUrls The cex URL addresses
