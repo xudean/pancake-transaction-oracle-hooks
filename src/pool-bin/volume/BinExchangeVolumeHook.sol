@@ -49,6 +49,7 @@ contract BinExchangeVolumeHook is BinBaseHook, BaseFeeDiscountHook {
         returns (bytes4)
     {
         poolManager.updateDynamicLPFee(key, defaultFee);
+        poolFeeMapping[key.toId()] = defaultFee;
         poolsInitialized.push(key.toId());
         return (this.afterInitialize.selector);
     }
@@ -68,7 +69,7 @@ contract BinExchangeVolumeHook is BinBaseHook, BaseFeeDiscountHook {
       @param fee
       @return
      */
-    function updatePoolFeeByPoolKey(PoolKey memory poolKey ,uint24 newBaseFee) external onlyOwner {
+    function updatePoolFeeByPoolKey(PoolKey memory poolKey, uint24 newBaseFee) external onlyOwner {
         poolManager.updateDynamicLPFee(poolKey, newBaseFee);
     }
 
@@ -77,10 +78,12 @@ contract BinExchangeVolumeHook is BinBaseHook, BaseFeeDiscountHook {
       @param fee
       @return
      */
-    function updatePoolFeeByPoolId(PoolId[] memory poolIds ,uint24 newBaseFee) external onlyOwner {
+    function updatePoolFeeByPoolId(PoolId[] memory poolIds, uint24 newBaseFee) external onlyOwner {
         for (uint256 i = 0; i < poolIds.length; i++) {
-            (Currency currency0, Currency currency1, IHooks hooks, IPoolManager manager, uint24 fee, bytes32 parameters) = poolManager.poolIdToPoolKey(poolIds[i]);
+            (Currency currency0, Currency currency1, IHooks hooks, IPoolManager manager, uint24 fee, bytes32 parameters)
+            = poolManager.poolIdToPoolKey(poolIds[i]);
             poolManager.updateDynamicLPFee(PoolKey(currency0, currency1, hooks, manager, fee, parameters), newBaseFee);
+            poolFeeMapping[poolIds[i]] = newBaseFee;
         }
     }
 }

@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 import {PoolKey} from "pancake-v4-core/src/types/PoolKey.sol";
 import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "pancake-v4-core/src/types/BeforeSwapDelta.sol";
-import {PoolIdLibrary,PoolId} from "pancake-v4-core/src/types/PoolId.sol";
+import {PoolIdLibrary, PoolId} from "pancake-v4-core/src/types/PoolId.sol";
 import {ICLPoolManager} from "pancake-v4-core/src/pool-cl/interfaces/ICLPoolManager.sol";
 import {IPoolManager} from "pancake-v4-core/src/interfaces/IPoolManager.sol";
 import {Currency} from "pancake-v4-core/src/types/Currency.sol";
@@ -51,6 +51,7 @@ contract CLExchangeVolumeHook is CLBaseHook, BaseFeeDiscountHook {
         returns (bytes4)
     {
         poolManager.updateDynamicLPFee(key, defaultFee);
+        poolFeeMapping[key.toId()] = defaultFee;
         poolsInitialized.push(key.toId());
         return (this.afterInitialize.selector);
     }
@@ -65,14 +66,14 @@ contract CLExchangeVolumeHook is CLBaseHook, BaseFeeDiscountHook {
         return (this.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee);
     }
 
-
     /*
       @dev Set default fee for pool
       @param fee
       @return
      */
-    function updatePoolFeeByPoolKey(PoolKey memory poolKey ,uint24 newBaseFee) external onlyOwner {
+    function updatePoolFeeByPoolKey(PoolKey memory poolKey, uint24 newBaseFee) external onlyOwner {
         poolManager.updateDynamicLPFee(poolKey, newBaseFee);
+        poolFeeMapping[poolKey.toId()] = newBaseFee;
     }
 
     /*
@@ -80,10 +81,12 @@ contract CLExchangeVolumeHook is CLBaseHook, BaseFeeDiscountHook {
       @param fee
       @return
      */
-    function updatePoolFeeByPoolId(PoolId[] memory poolIds ,uint24 newBaseFee) external onlyOwner {
+    function updatePoolFeeByPoolId(PoolId[] memory poolIds, uint24 newBaseFee) external onlyOwner {
         for (uint256 i = 0; i < poolIds.length; i++) {
-            (Currency currency0, Currency currency1, IHooks hooks, IPoolManager manager, uint24 fee, bytes32 parameters) = poolManager.poolIdToPoolKey(poolIds[i]);
+            (Currency currency0, Currency currency1, IHooks hooks, IPoolManager manager, uint24 fee, bytes32 parameters)
+            = poolManager.poolIdToPoolKey(poolIds[i]);
             poolManager.updateDynamicLPFee(PoolKey(currency0, currency1, hooks, manager, fee, parameters), newBaseFee);
+            poolFeeMapping[poolIds[i]] = newBaseFee;
         }
     }
 }
