@@ -79,6 +79,14 @@ abstract contract BaseFeeDiscountHook is Ownable {
     }
 
     /*
+      @dev Get initialized pool size
+      @return uint
+     */
+    function getInitializedPoolSize() external view returns (uint256) {
+        return poolsInitialized.length;
+    }
+
+    /*
       @dev Check the user has a attestation and the attestation is not expired
       @param sender
       @return bool , sender has valid attestation.

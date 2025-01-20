@@ -83,7 +83,7 @@ contract BinUtils {
         Plan memory planner = Planner.init().add(Actions.BIN_ADD_LIQUIDITY, abi.encode(params));
         bytes memory data = planner.finalizeModifyLiquidityWithClose(params.poolKey);
         console.log("addLiquidity2");
-        positionManager.modifyLiquidities(data, block.timestamp);
+        positionManager.modifyLiquidities(data, block.timestamp + 100);
     }
 
     // prettier-ignore
