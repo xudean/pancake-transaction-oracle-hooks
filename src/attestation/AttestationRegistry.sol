@@ -119,14 +119,15 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
         }
 
         require(_attestation.recipient == msg.sender, "Invalid recipient");
+        require(_attestation.reponseResolve.length > 0, "Invalid response resolve");
         // verify the attestation is valid
         primusZKTLS.verifyAttestation(_attestation);
-
+        // verify the url is valid
         string memory url = _attestation.request.url;
         string memory baseUrl = extractBaseUrl(url);
         CexInfo memory cexInfo = cexInfoMapping[baseUrl];
         require(bytes(cexInfo.cexName).length > 0, "Unsupported URL");
-
+       
         // verify the parsePath is valid
         require(
             keccak256(bytes(cexInfo.parsePath)) == keccak256(bytes(_attestation.reponseResolve[0].parsePath)),
@@ -135,6 +136,8 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
 
         // verify the value is valid
         string memory valueString = _attestation.attConditions.extractValue("value");
+        require(bytes(valueString).length > 0, "Invalid value for the Attestation");
+    
         uint256 value = valueString.stringToUint();
         string memory operaStr = _attestation.attConditions.extractValue("op");
         require(
