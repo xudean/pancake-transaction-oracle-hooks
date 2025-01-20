@@ -71,6 +71,7 @@ contract BinExchangeVolumeHook is BinBaseHook, BaseFeeDiscountHook {
      */
     function updatePoolFeeByPoolKey(PoolKey memory poolKey, uint24 newBaseFee) external onlyOwner {
         poolManager.updateDynamicLPFee(poolKey, newBaseFee);
+        poolFeeMapping[poolKey.toId()] = newBaseFee;
     }
 
     /*
