@@ -19,25 +19,29 @@ abstract contract BaseFeeDiscountHook is Ownable {
     event BeforeAddLiquidity(address indexed sender);
     event BeforeSwap(address indexed sender);
 
-    uint24 private defaultFee = 3000;
+    uint24 public defaultFee = 3000;
 
-    uint24 private baseValue = 10000;
+    uint24 public baseValue = 10000;
 
-    uint24 private durationOfAttestation = 7;
+    uint24 public durationOfAttestation = 7;
 
-    // mapping(PoolId => uint24) public poolFeeMapping;
+    PoolId[] public poolsInitialized;
+
+    mapping(PoolId => uint24) public poolFeeMapping;
+
     // AttestationRegistry
-    IAttestationRegistry internal iAttestationRegistry;
+    IAttestationRegistry public iAttestationRegistry;
 
     constructor(IAttestationRegistry _iAttestationRegistry, address initialOwner) Ownable(initialOwner) {
         iAttestationRegistry = _iAttestationRegistry;
     }
 
     function getFeeDiscount(address sender, PoolKey memory poolKey) internal view returns (uint24) {
+        uint24 poolFee = poolFeeMapping[poolKey.toId()];
         if (_checkAttestations(sender)) {
-            return (defaultFee / 2) | LPFeeLibrary.OVERRIDE_FEE_FLAG;
+            return (poolFee / 2) | LPFeeLibrary.OVERRIDE_FEE_FLAG;
         }
-        return defaultFee;
+        return poolFee;
     }
 
     /*
@@ -50,28 +54,12 @@ abstract contract BaseFeeDiscountHook is Ownable {
     }
 
     /*
-      @dev Get default fee
-      @return uint24
-     */
-    function getDefaultFee() public view returns (uint24) {
-        return defaultFee;
-    }
-
-    /*
     @dev Set baseValue
       @param _baseValue
       @return
      */
     function setBaseValue(uint24 _baseValue) external onlyOwner {
         baseValue = _baseValue;
-    }
-
-    /*
-      @dev Get baseValue
-      @return uint24
-     */
-    function getBaseValue() public view returns (uint24) {
-        return baseValue;
     }
 
     /*
@@ -84,19 +72,10 @@ abstract contract BaseFeeDiscountHook is Ownable {
     }
 
     /*
-      @dev Get durationOfAttestation
-      @return uint24
+      @dev Set attestationRegistry
      */
-    function getDurationOfAttestation() external view returns (uint24) {
-        return durationOfAttestation;
-    }
-
-    /*
-      @dev Get attestationRegistry
-      @return IAttestationRegistry
-     */
-    function getAttestationRegistry() external view returns (IAttestationRegistry) {
-        return iAttestationRegistry;
+    function setAttestationRegistry(IAttestationRegistry _iAttestationRegistry) external onlyOwner {
+        iAttestationRegistry = _iAttestationRegistry;
     }
 
     /*

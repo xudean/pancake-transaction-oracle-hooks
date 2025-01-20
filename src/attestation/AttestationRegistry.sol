@@ -3,13 +3,13 @@ pragma solidity ^0.8.24;
 
 import {Attestation as PrimusAttestation, IPrimusZKTLS} from "zkTLS-contracts/src/IPrimusZKTLS.sol";
 import {Attestation} from "../types/Common.sol";
-import {IAttestationRegistry} from '../IAttestationRegistry.sol';
+import {IAttestationRegistry} from "../IAttestationRegistry.sol";
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
 import {UintString} from "forge-gas-snapshot/src/utils/UintString.sol";
 
 import {JsonParser} from "../utils/JsonParser.sol";
 
- struct CexInfo {
+struct CexInfo {
     // The cex name
     string cexName;
     // jsonPath to get
@@ -20,10 +20,11 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
     using JsonParser for string;
     using UintString for string;
     // Attestation with address mapping
+
     mapping(address => Attestation[]) public attestationsOfAddress;
     // Cex info mapping cex url => CexInfo
     mapping(string => CexInfo) public cexInfoMapping;
-    // IPrimusZKTLS contract    
+    // IPrimusZKTLS contract
     IPrimusZKTLS internal primusZKTLS;
     // submission fee
     uint256 public submissionFee;
@@ -57,7 +58,10 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
      *  @param _cexNames The cex names such as "binance" "okx" etc.
      *  @param _jsonPaths The json paths
      */
-    function setCexAndJsonPath(string[] memory _cexUrls, string[] memory _cexNames, string[] memory _jsonPaths) external onlyOwner {
+    function setCexAndJsonPath(string[] memory _cexUrls, string[] memory _cexNames, string[] memory _jsonPaths)
+        external
+        onlyOwner
+    {
         require(_cexUrls.length == _cexNames.length && _cexNames.length == _jsonPaths.length, "Array length mismatch");
         for (uint256 i = 0; i < _cexUrls.length; ++i) {
             cexInfoMapping[_cexUrls[i]] = CexInfo({cexName: _cexNames[i], parsePath: _jsonPaths[i]});
@@ -65,10 +69,11 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
     }
 
     /**
-    *  @dev getCexInfoDetail
-    *  @param _cexUrl The cex URL address
-    *  @return CexInfo
-    * */
+     *  @dev getCexInfoDetail
+     *  @param _cexUrl The cex URL address
+     *  @return CexInfo
+     *
+     */
     function getCexInfoDetail(string memory _cexUrl) external view returns (CexInfo memory) {
         require(bytes(cexInfoMapping[_cexUrl].cexName).length > 0, "URL not found");
         return cexInfoMapping[_cexUrl];
@@ -80,7 +85,10 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
      * @param _cexName The cex name such as "binance" "okx" etc.
      * @param _jsonPath The parsing path
      */
-    function addUrlToCexInfo(string memory _cexUrl, string memory _cexName, string memory _jsonPath) external onlyOwner {
+    function addUrlToCexInfo(string memory _cexUrl, string memory _cexName, string memory _jsonPath)
+        external
+        onlyOwner
+    {
         cexInfoMapping[_cexUrl] = CexInfo({cexName: _cexName, parsePath: _jsonPath});
         emit UrlToCexInfoAdded(_cexUrl, _cexName);
     }
@@ -105,7 +113,7 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
 
         // send fee to feeRecipient
         if (submissionFee > 0) {
-            (bool sent, ) = feeRecipient.call{value: msg.value}("");
+            (bool sent,) = feeRecipient.call{value: msg.value}("");
             require(sent, "Failed to send fee");
             emit FeeReceived(msg.sender, msg.value);
         }
@@ -151,7 +159,7 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
      * @return Attestation[] memory
      */
     function getAttestationByRecipient(address recipient) public view returns (Attestation[] memory) {
-        require(recipient!= address(0), "Invalid address");
+        require(recipient != address(0), "Invalid address");
         return attestationsOfAddress[recipient];
     }
 

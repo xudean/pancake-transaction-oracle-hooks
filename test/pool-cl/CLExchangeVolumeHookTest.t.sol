@@ -3,6 +3,7 @@
 pragma solidity ^0.8.24;
 
 import "./util/MockAttestationRegistry.t.sol";
+import {Constants} from "pancake-v4-core/test/pool-cl/helpers/Constants.sol";
 import {Currency} from "pancake-v4-core/src/types/Currency.sol";
 import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "pancake-v4-core/src/types/BeforeSwapDelta.sol";
 import {CLExchangeVolumeHook} from "../../src/pool-cl/volume/CLExchangeVolumeHook.sol";
@@ -58,9 +59,9 @@ contract CLExchangeVolumeHookTest is Test {
             currency0: Currency.wrap(address(0)), // Replace with actual token address
             currency1: Currency.wrap(address(1)), // Replace with actual token address
             hooks: IHooks(address(clExchangeVolumeHook)),
-            poolManager: IPoolManager(address(0)),
-            fee: 3000, // Example fee, replace with actual value
-            parameters: keccak256(abi.encodePacked("1"))
+            poolManager: clPoolManager,
+            fee: LPFeeLibrary.DYNAMIC_FEE_FLAG, // Example fee, replace with actual value
+            parameters: bytes32(uint256(IHooks(address(clExchangeVolumeHook)).getHooksRegistrationBitmap())).setTickSpacing(10)
         });
 
         // Define valid SwapParams (adjust fields as per actual definition)
@@ -69,6 +70,13 @@ contract CLExchangeVolumeHookTest is Test {
             sqrtPriceLimitX96: 0, // Replace with appropriate value
             zeroForOne: true // Example direction
         });
+
+        clPoolManager.initialize(poolKey,Constants.SQRT_RATIO_1_4 );
+
+        //update fee
+        vm.prank(clExchangeVolumeHook.owner());
+        clExchangeVolumeHook.updatePoolFeeByPoolKey(poolKey,3000);
+
         console.logString("start swap");
         vm.prank(address(clPoolManager));
         (bytes4 selector1, BeforeSwapDelta beforeSwapDelta1, uint24 fee1) =
@@ -99,7 +107,7 @@ contract CLExchangeVolumeHookTest is Test {
         clExchangeVolumeHook.setDefaultFee(5000);
 
         // Verify the state update
-        uint256 updatedFee = clExchangeVolumeHook.getDefaultFee();
+        uint256 updatedFee = clExchangeVolumeHook.defaultFee();
         assertEq(updatedFee, 5000);
     }
 
@@ -113,7 +121,7 @@ contract CLExchangeVolumeHookTest is Test {
         vm.prank(owner); // Mock the caller as the owner
         clExchangeVolumeHook.setBaseValue(20000);
         // Verify the state update
-        uint256 updatedFee = clExchangeVolumeHook.getBaseValue();
+        uint256 updatedFee = clExchangeVolumeHook.baseValue();
         assertEq(updatedFee, 20000);
     }
 

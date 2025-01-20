@@ -17,11 +17,7 @@ contract DeployAttestationRegistry is Script {
         address payable feeRecipient = payable(vm.envAddress("FEE_RECIPIENT")); // fee recipient
 
         // deploy AttestationRegistry
-        AttestationRegistry attestationRegistry = new AttestationRegistry(
-            primusZKTLS,
-            submissionFee,
-            feeRecipient
-        );
+        AttestationRegistry attestationRegistry = new AttestationRegistry(primusZKTLS, submissionFee, feeRecipient);
         string[] memory cexUrls = new string[](4);
         cexUrls[0] = "https://www.okx.com/v3/users/fee/trading-volume-progress";
         cexUrls[1] = "https://www.bitget.com/v1/mix/vip/need";
@@ -37,11 +33,10 @@ contract DeployAttestationRegistry is Script {
         cexNames[1] = "bitget";
         cexNames[2] = "binance";
         cexNames[3] = "bybit";
-        attestationRegistry.setCexAndJsonPath(cexUrls,cexNames,cexJsonPaths);
+        attestationRegistry.setCexAndJsonPath(cexUrls, cexNames, cexJsonPaths);
 
         console.log("AttestationRegistry deployed at:", address(attestationRegistry));
 
         vm.stopBroadcast();
     }
 }
-
