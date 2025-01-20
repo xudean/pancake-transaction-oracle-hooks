@@ -25,9 +25,9 @@ abstract contract BaseFeeDiscountHook is Ownable {
 
     uint24 private durationOfAttestation = 7;
 
-    // mapping(PoolId => uint24) public poolFeeMapping;
+    PoolId[] public poolsInitialized;
     // AttestationRegistry
-    IAttestationRegistry internal iAttestationRegistry;
+    IAttestationRegistry public iAttestationRegistry;
 
     constructor(IAttestationRegistry _iAttestationRegistry, address initialOwner) Ownable(initialOwner) {
         iAttestationRegistry = _iAttestationRegistry;
@@ -97,6 +97,13 @@ abstract contract BaseFeeDiscountHook is Ownable {
      */
     function getAttestationRegistry() external view returns (IAttestationRegistry) {
         return iAttestationRegistry;
+    }
+
+    /*
+      @dev Set attestationRegistry
+     */
+    function setAttestationRegistry(IAttestationRegistry _iAttestationRegistry) external onlyOwner {
+        iAttestationRegistry = _iAttestationRegistry;
     }
 
     /*
