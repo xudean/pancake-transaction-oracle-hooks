@@ -19,11 +19,11 @@ abstract contract BaseFeeDiscountHook is Ownable {
     event BeforeAddLiquidity(address indexed sender);
     event BeforeSwap(address indexed sender);
 
-    uint24 private defaultFee = 3000;
+    uint24 public defaultFee = 3000;
 
-    uint24 private baseValue = 10000;
+    uint24 public baseValue = 10000;
 
-    uint24 private durationOfAttestation = 7;
+    uint24 public durationOfAttestation = 7;
 
     PoolId[] public poolsInitialized;
     // AttestationRegistry
@@ -50,14 +50,6 @@ abstract contract BaseFeeDiscountHook is Ownable {
     }
 
     /*
-      @dev Get default fee
-      @return uint24
-     */
-    function getDefaultFee() public view returns (uint24) {
-        return defaultFee;
-    }
-
-    /*
     @dev Set baseValue
       @param _baseValue
       @return
@@ -67,36 +59,12 @@ abstract contract BaseFeeDiscountHook is Ownable {
     }
 
     /*
-      @dev Get baseValue
-      @return uint24
-     */
-    function getBaseValue() public view returns (uint24) {
-        return baseValue;
-    }
-
-    /*
       @dev Set durationOfAttestation
       @param _durationOfAttestation
       @return
      */
     function setDurationOfAttestation(uint24 _durationOfAttestation) external onlyOwner {
         durationOfAttestation = _durationOfAttestation;
-    }
-
-    /*
-      @dev Get durationOfAttestation
-      @return uint24
-     */
-    function getDurationOfAttestation() external view returns (uint24) {
-        return durationOfAttestation;
-    }
-
-    /*
-      @dev Get attestationRegistry
-      @return IAttestationRegistry
-     */
-    function getAttestationRegistry() external view returns (IAttestationRegistry) {
-        return iAttestationRegistry;
     }
 
     /*
