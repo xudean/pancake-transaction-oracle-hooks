@@ -61,7 +61,9 @@ contract CLExchangeVolumeHookTest is Test {
             hooks: IHooks(address(clExchangeVolumeHook)),
             poolManager: clPoolManager,
             fee: LPFeeLibrary.DYNAMIC_FEE_FLAG, // Example fee, replace with actual value
-            parameters: bytes32(uint256(IHooks(address(clExchangeVolumeHook)).getHooksRegistrationBitmap())).setTickSpacing(10)
+            parameters: bytes32(uint256(IHooks(address(clExchangeVolumeHook)).getHooksRegistrationBitmap())).setTickSpacing(
+                10
+            )
         });
 
         // Define valid SwapParams (adjust fields as per actual definition)
@@ -71,11 +73,11 @@ contract CLExchangeVolumeHookTest is Test {
             zeroForOne: true // Example direction
         });
 
-        clPoolManager.initialize(poolKey,Constants.SQRT_RATIO_1_4 );
-
+        clPoolManager.initialize(poolKey, Constants.SQRT_RATIO_1_4);
+        console.log("initialize pool size:", clExchangeVolumeHook.getInitializedPoolSize());
         //update fee
         vm.prank(clExchangeVolumeHook.owner());
-        clExchangeVolumeHook.updatePoolFeeByPoolKey(poolKey,3000);
+        clExchangeVolumeHook.updatePoolFeeByPoolKey(poolKey, 3000);
 
         console.logString("start swap");
         vm.prank(address(clPoolManager));

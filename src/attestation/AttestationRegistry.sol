@@ -52,21 +52,22 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
         feeRecipient = _feeRecipient;
     }
 
-
     /**
      *  @dev set IPrimusZKTLS contract instance
      *  @param _primusZKTLS The address of the IPrimusZKTLS contract
-     * 
-     * */ 
+     *
+     *
+     */
     function setPrimusZKTLS(address _primusZKTLS) public onlyOwner {
         primusZKTLS = IPrimusZKTLS(_primusZKTLS);
     }
 
     /**
-     *  @dev set submissionFee 
+     *  @dev set submissionFee
      *  @param _submissionFee The submission fee
-     * 
-     * */  
+     *
+     *
+     */
     function setSubmissionFee(uint256 _submissionFee) public onlyOwner {
         submissionFee = _submissionFee;
     }
@@ -74,7 +75,8 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
     /**
      * @dev set feeRecipient
      * @param _feeRecipient The fee recipient
-     * */ 
+     *
+     */
     function setFeeRecipient(address payable _feeRecipient) public onlyOwner {
         feeRecipient = _feeRecipient;
     }
@@ -154,7 +156,7 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
         string memory baseUrl = extractBaseUrl(url);
         CexInfo memory cexInfo = cexInfoMapping[baseUrl];
         require(bytes(cexInfo.cexName).length > 0, "Unsupported URL");
-       
+
         // verify the parsePath is valid
         require(
             keccak256(bytes(cexInfo.parsePath)) == keccak256(bytes(_attestation.reponseResolve[0].parsePath)),
@@ -164,7 +166,7 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
         // verify the value is valid
         string memory valueString = _attestation.attConditions.extractValue("value");
         require(bytes(valueString).length > 0, "Invalid value for the Attestation");
-    
+
         uint256 value = valueString.stringToUint();
         string memory operaStr = _attestation.attConditions.extractValue("op");
         require(
