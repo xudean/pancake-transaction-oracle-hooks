@@ -48,7 +48,7 @@ contract BinExchangeVolumeHook is BinBaseHook, BaseFeeDiscountHook {
         poolManagerOnly
         returns (bytes4)
     {
-        poolManager.updateDynamicLPFee(key, getDefaultFee());
+        poolManager.updateDynamicLPFee(key, defaultFee);
         poolsInitialized.push(key.toId());
         return (this.afterInitialize.selector);
     }

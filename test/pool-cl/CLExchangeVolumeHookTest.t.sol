@@ -99,7 +99,7 @@ contract CLExchangeVolumeHookTest is Test {
         clExchangeVolumeHook.setDefaultFee(5000);
 
         // Verify the state update
-        uint256 updatedFee = clExchangeVolumeHook.getDefaultFee();
+        uint256 updatedFee = clExchangeVolumeHook.defaultFee();
         assertEq(updatedFee, 5000);
     }
 
@@ -113,7 +113,7 @@ contract CLExchangeVolumeHookTest is Test {
         vm.prank(owner); // Mock the caller as the owner
         clExchangeVolumeHook.setBaseValue(20000);
         // Verify the state update
-        uint256 updatedFee = clExchangeVolumeHook.getBaseValue();
+        uint256 updatedFee = clExchangeVolumeHook.baseValue();
         assertEq(updatedFee, 20000);
     }
 
