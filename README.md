@@ -113,7 +113,7 @@ Add/replace the above address in `.env`.
 
 ```sh
 source .env
-forge script script/pool-cl/Test.s.sol:TestInitializeScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+forge script script/pool-cl/Test.s.sol:TestInitializeScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --gas-estimate-multiplier 600 --broadcast
 ```
 
 This command only needs to be executed once.
