@@ -149,7 +149,7 @@ Before performing a swap test, make sure to approve the token first.
 
 ```sh
 source .env
-forge script script/Approve.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+forge script script/pool-cl/Approve.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
 ```
 
 ### Add Liquidity
