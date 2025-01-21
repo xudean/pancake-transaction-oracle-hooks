@@ -1,5 +1,5 @@
 # AttestationRegistry
-[Git Source](https://github.com/WuEcho/pancake-transaction-oracle-hooks/blob/feca97195ce7999ef87419eab15c366c609ecf4a/src/attestation/AttestationRegistry.sol)
+[Git Source](https://github.com/WuEcho/pancake-transaction-oracle-hooks/blob/d25cacf462cd44cfa2b91ac015aa755b33e6c616/src/attestation/AttestationRegistry.sol)
 
 **Inherits:**
 Ownable, [IAttestationRegistry](/src/IAttestationRegistry.sol/interface.IAttestationRegistry.md)
@@ -56,6 +56,51 @@ constructor(address _primusZKTLS, uint256 _submissionFee, address payable _feeRe
 |----|----|-----------|
 |`_primusZKTLS`|`address`|The address of the IPrimusZKTLS contract|
 |`_submissionFee`|`uint256`|The submission fee|
+|`_feeRecipient`|`address payable`|The fee recipient|
+
+
+### setPrimusZKTLS
+
+*set IPrimusZKTLS contract instance*
+
+
+```solidity
+function setPrimusZKTLS(address _primusZKTLS) public onlyOwner;
+```
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`_primusZKTLS`|`address`|The address of the IPrimusZKTLS contract|
+
+
+### setSubmissionFee
+
+*set submissionFee*
+
+
+```solidity
+function setSubmissionFee(uint256 _submissionFee) public onlyOwner;
+```
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`_submissionFee`|`uint256`|The submission fee|
+
+
+### setFeeRecipient
+
+*set feeRecipient*
+
+
+```solidity
+function setFeeRecipient(address payable _feeRecipient) public onlyOwner;
+```
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
 |`_feeRecipient`|`address payable`|The fee recipient|
 
 
