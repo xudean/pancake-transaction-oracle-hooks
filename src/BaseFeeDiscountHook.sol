@@ -51,8 +51,10 @@ abstract contract BaseFeeDiscountHook is Ownable {
       @return
      */
     function setDefaultFee(uint24 fee) external onlyOwner {
-        emit DefaultFeeChanged(defaultFee, fee);
+        uint24 oldFee = defaultFee;
         defaultFee = fee;
+        emit DefaultFeeChanged(oldFee, fee);
+
     }
 
     /*
@@ -61,8 +63,9 @@ abstract contract BaseFeeDiscountHook is Ownable {
       @return
      */
     function setBaseValue(uint24 _baseValue) external onlyOwner {
-        emit BaseValueChanged(baseValue, _baseValue);
+        uint24 oldBaseValue = baseValue;
         baseValue = _baseValue;
+        emit BaseValueChanged(oldBaseValue, _baseValue);
     }
 
     /*
@@ -71,16 +74,18 @@ abstract contract BaseFeeDiscountHook is Ownable {
       @return
      */
     function setDurationOfAttestation(uint24 _durationOfAttestation) external onlyOwner {
-        emit DurationOfAttestationChanged(durationOfAttestation, _durationOfAttestation);
+        uint24 oldDurationOfAttestation = durationOfAttestation;
         durationOfAttestation = _durationOfAttestation;
+        emit DurationOfAttestationChanged(oldDurationOfAttestation, _durationOfAttestation);
     }
 
     /*
       @dev Set attestationRegistry
      */
     function setAttestationRegistry(IAttestationRegistry _iAttestationRegistry) external onlyOwner {
-        emit AttestationRegistryChanged(address(iAttestationRegistry), address(_iAttestationRegistry));
+        IAttestationRegistry oldIAttestationRegistry = iAttestationRegistry;
         iAttestationRegistry = _iAttestationRegistry;
+        emit AttestationRegistryChanged(address(oldIAttestationRegistry), address(_iAttestationRegistry));
     }
 
     /*
