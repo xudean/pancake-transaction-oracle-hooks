@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity 0.8.26;
 
 import {Attestation as PrimusAttestation, IPrimusZKTLS} from "zkTLS-contracts/src/IPrimusZKTLS.sol";
 import {Attestation} from "../types/Common.sol";
@@ -31,14 +31,23 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
     // fee recipient
     address payable public feeRecipient;
 
+    // SetPrimusZKTLS PrimusZKTLS contract set event
+    event SetPrimusZKTLS(address _origenPrimus, address _primusAddress);
     // AttestationSubmitted event
     event AttestationSubmitted(address recipient, string cexName, uint256 value, uint256 timestamp);
+    // SetSubmisssionFee event
+    event SetSubmisssionFee(uint256 _origenSubmissionFee, uint256 _submissionFee);
     // fee received event
     event FeeReceived(address sender, uint256 amount);
+    // SetFeeRecipient event
+    event SetFeeRecipient(address _origenFeeRecipient, address _feeRecipient);
+    // SetCexAndJsonPath event
+    event SetCexAndJsonPath(string[] cexUrl, string[] cexName, string[] parsePath);
     // cexUrl to cexName added event
     event UrlToCexInfoAdded(string indexed cexUrl, string cexName);
     // cexUrl to cexName removed event
     event UrlToCexInfoRemoved(string indexed cexUrl);
+
 
     /**
      *  @dev Constructor
@@ -59,10 +68,12 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
      *
      */
     function setPrimusZKTLS(address _primusZKTLS) public onlyOwner {
+        address _origenPrimus = address(primusZKTLS);
         primusZKTLS = IPrimusZKTLS(_primusZKTLS);
+        emit SetPrimusZKTLS(_origenPrimus, _primusZKTLS);
     }
 
-    /**
+    /**     
      *  @dev set submissionFee
      *  @param _submissionFee The submission fee
      *
@@ -70,6 +81,7 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
      */
     function setSubmissionFee(uint256 _submissionFee) public onlyOwner {
         submissionFee = _submissionFee;
+        emit SetSubmisssionFee(submissionFee, _submissionFee);
     }
 
     /**
@@ -79,6 +91,7 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
      */
     function setFeeRecipient(address payable _feeRecipient) public onlyOwner {
         feeRecipient = _feeRecipient;
+        emit SetFeeRecipient(feeRecipient, _feeRecipient);
     }
 
     /**
@@ -95,6 +108,7 @@ contract AttestationRegistry is Ownable, IAttestationRegistry {
         for (uint256 i = 0; i < _cexUrls.length; ++i) {
             cexInfoMapping[_cexUrls[i]] = CexInfo({cexName: _cexNames[i], parsePath: _jsonPaths[i]});
         }
+        emit SetCexAndJsonPath(_cexUrls, _cexNames, _jsonPaths);
     }
 
     /**

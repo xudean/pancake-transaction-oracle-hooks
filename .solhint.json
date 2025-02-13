@@ -1,0 +1,16 @@
+{
+  "extends": "solhint:recommended",
+  "rules": {
+    "avoid-suicide": "error",
+    "no-empty-blocks": "off",
+    "avoid-suicide": "error",
+    "avoid-reentrancy": "error",
+    "variable-name-mixedcase": "error",
+    "function-name-mixedcase": "error",
+    "func-visibility": "error",
+    "no-unused-vars": "error",
+    "require-assert": "error",
+    "no-payable-fallback": "error",
+    "func-visibility": ["error", { "ignoreConstructors": true }]
+  }
+}
