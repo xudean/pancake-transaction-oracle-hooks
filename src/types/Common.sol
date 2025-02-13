@@ -8,6 +8,6 @@ struct Attestation {
     string exchange;
     // The value of the attestation
     uint32 value;
-    // The timestamp of the attestation
+    // The timestamp of the attestation in milliseconds
     uint256 timestamp;
 }
