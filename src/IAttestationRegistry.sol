@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.24;
+pragma solidity 0.8.26;
 
 import "./types/Common.sol";
 import {Attestation as PrimusAttestation} from "zkTLS-contracts/src/IPrimusZKTLS.sol";
