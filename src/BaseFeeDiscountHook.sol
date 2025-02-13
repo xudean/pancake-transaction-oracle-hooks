@@ -12,12 +12,13 @@ import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
 abstract contract BaseFeeDiscountHook is Ownable {
     using LPFeeLibrary for uint24;
 
-    error NotSupportedExchange();
-    error AttestationExpired();
-    error NoAttestationEligibility();
-
     event BeforeAddLiquidity(address indexed sender);
     event BeforeSwap(address indexed sender);
+
+    event DefaultFeeChanged(uint24 oldFee, uint24 newFee);
+    event BaseValueChanged(uint24 oldBaseValue, uint24 newBaseValue);
+    event DurationOfAttestationChanged(uint24 oldDurationOfAttestation, uint24 newDurationOfAttestation);
+    event AttestationRegistryChanged(address oldAttestationRegistry, address newAttestationRegistry);
 
     uint24 public defaultFee = 3000;
 
@@ -50,7 +51,10 @@ abstract contract BaseFeeDiscountHook is Ownable {
       @return
      */
     function setDefaultFee(uint24 fee) external onlyOwner {
+        uint24 oldFee = defaultFee;
         defaultFee = fee;
+        emit DefaultFeeChanged(oldFee, fee);
+
     }
 
     /*
@@ -59,7 +63,9 @@ abstract contract BaseFeeDiscountHook is Ownable {
       @return
      */
     function setBaseValue(uint24 _baseValue) external onlyOwner {
+        uint24 oldBaseValue = baseValue;
         baseValue = _baseValue;
+        emit BaseValueChanged(oldBaseValue, _baseValue);
     }
 
     /*
@@ -68,14 +74,18 @@ abstract contract BaseFeeDiscountHook is Ownable {
       @return
      */
     function setDurationOfAttestation(uint24 _durationOfAttestation) external onlyOwner {
+        uint24 oldDurationOfAttestation = durationOfAttestation;
         durationOfAttestation = _durationOfAttestation;
+        emit DurationOfAttestationChanged(oldDurationOfAttestation, _durationOfAttestation);
     }
 
     /*
       @dev Set attestationRegistry
      */
     function setAttestationRegistry(IAttestationRegistry _iAttestationRegistry) external onlyOwner {
+        IAttestationRegistry oldIAttestationRegistry = iAttestationRegistry;
         iAttestationRegistry = _iAttestationRegistry;
+        emit AttestationRegistryChanged(address(oldIAttestationRegistry), address(_iAttestationRegistry));
     }
 
     /*
