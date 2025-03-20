@@ -89,7 +89,7 @@ contract BinExchangeVolumeHook is BinBaseHook, BaseFeeDiscountHook {
 
 
     function withdrawHookFee(address recipient, Currency currency) external onlyOwner returns (uint256 amount) {
-        return _withdrawHookFee(vault,recipient, currency,currency);
+        return _withdrawHookFee(vault,recipient,currency);
     }
 
 

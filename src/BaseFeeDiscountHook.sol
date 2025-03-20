@@ -46,7 +46,7 @@ abstract contract BaseFeeDiscountHook is Ownable {
     }
 
 
-    function _withdrawHookFee(IVault vault,address recipient, Currency currency) internal returns (uint256 amount) {
+    function _withdrawHookFee(IVault vault, address recipient, Currency currency) internal returns (uint256 amount) {
         amount = vault.balanceOf(address(this), currency);
         if (amount == 0) {
             return 0;
