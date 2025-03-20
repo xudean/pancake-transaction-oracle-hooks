@@ -12,13 +12,19 @@ import {IBinPoolManager} from "pancake-v4-core/src/pool-bin/interfaces/IBinPoolM
 import {LPFeeLibrary} from "pancake-v4-core/src/libraries/LPFeeLibrary.sol";
 import {PoolId, PoolIdLibrary} from "pancake-v4-core/src/types/PoolId.sol";
 import {PoolKey} from "pancake-v4-core/src/types/PoolKey.sol";
+import {SafeCast} from "pancake-v4-core/src/libraries/SafeCast.sol";
+import {CurrencyLibrary} from "pancake-v4-core/src/types/Currency.sol";
+
 
 contract BinExchangeVolumeHook is BinBaseHook, BaseFeeDiscountHook {
     using PoolIdLibrary for PoolKey;
+    using SafeCast for uint256;
+    using SafeCast for int128;
+    using CurrencyLibrary for Currency;
 
     constructor(IBinPoolManager poolManager, IAttestationRegistry _attestationRegistry, address initialOwner)
-        BinBaseHook(poolManager)
-        BaseFeeDiscountHook(_attestationRegistry, initialOwner)
+    BinBaseHook(poolManager)
+    BaseFeeDiscountHook(_attestationRegistry, initialOwner)
     {}
 
     function getHooksRegistrationBitmap() external pure override returns (uint16) {
@@ -31,7 +37,7 @@ contract BinExchangeVolumeHook is BinBaseHook, BaseFeeDiscountHook {
                 beforeBurn: false,
                 afterBurn: false,
                 beforeSwap: true,
-                afterSwap: false,
+                afterSwap: true,
                 beforeDonate: false,
                 afterDonate: false,
                 beforeSwapReturnsDelta: false,
@@ -43,11 +49,12 @@ contract BinExchangeVolumeHook is BinBaseHook, BaseFeeDiscountHook {
     }
 
     function afterInitialize(address sender, PoolKey calldata key, uint24 activeId)
-        external
-        override
-        poolManagerOnly
-        returns (bytes4)
+    external
+    override
+    poolManagerOnly
+    returns (bytes4)
     {
+        //TODO add event for PoolKey
         poolManager.updateDynamicLPFee(key, defaultFee);
         poolFeeMapping[key.toId()] = defaultFee;
         poolsInitialized.push(key.toId());
@@ -55,17 +62,39 @@ contract BinExchangeVolumeHook is BinBaseHook, BaseFeeDiscountHook {
     }
 
     function beforeSwap(address, PoolKey calldata key, bool, int128, bytes calldata)
-        external
-        override
-        poolManagerOnly
-        returns (bytes4, BeforeSwapDelta, uint24)
+    external
+    override
+    poolManagerOnly
+    returns (bytes4, BeforeSwapDelta, uint24)
     {
         uint24 fee = getFeeDiscount(tx.origin, key);
         return (this.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee);
     }
 
-    /*
-      @dev Update fee for pool by poolKey
+    function afterSwap(address sender, PoolKey calldata key, bool swapForY, int128 amountSpecified, BalanceDelta delta, bytes calldata hookData)
+    external
+    override
+    poolManagerOnly
+    returns (bytes4, int128)
+    {
+        (Currency feeCurrency, int128 swapAmount) =
+            (swapForY) ? (key.currency1, amountSpecified) : (key.currency0, amountSpecified);
+        // if fee is on output, get the absolute output amount
+        if (swapAmount < 0) swapAmount = -swapAmount;
+        //TODO hookFee default 0.01% now
+        uint256 feeAmount = uint256(uint128(swapAmount)) * 1 / TOTAL_FEE_BIPS;
+        vault.mint(address(this), feeCurrency, feeAmount);
+        return (this.afterSwap.selector, feeAmount.toInt128());
+    }
+
+
+    function withdrawHookFee(address recipient, Currency currency) external onlyOwner returns (uint256 amount) {
+        return _withdrawHookFee(vault,recipient, currency,currency);
+    }
+
+
+        /*
+@dev Update fee for pool by poolKey
       @param fee
       @return
      */

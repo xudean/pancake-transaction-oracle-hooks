@@ -8,12 +8,20 @@ import {PoolKey} from "pancake-v4-core/src/types/PoolKey.sol";
 import {IAttestationRegistry} from "./IAttestationRegistry.sol";
 import {Attestation} from "./types/Common.sol";
 import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
+import {IVault} from "pancake-v4-core/src/interfaces/IVault.sol";
+import {Currency} from "pancake-v4-core/src/types/Currency.sol";
+
 
 abstract contract BaseFeeDiscountHook is Ownable {
     using LPFeeLibrary for uint24;
 
     event BeforeAddLiquidity(address indexed sender);
     event BeforeSwap(address indexed sender);
+    event FeesWithdrawn(address indexed recipient, Currency indexed currency, uint256 amount);
+
+
+    /// @notice The max possible fee charged for each swap in bips (10000bp = 100%).
+    uint128 public constant TOTAL_FEE_BIPS = 10_000;
 
     event DefaultFeeChanged(uint24 oldFee, uint24 newFee);
     event BaseValueChanged(uint24 oldBaseValue, uint24 newBaseValue);
@@ -36,6 +44,29 @@ abstract contract BaseFeeDiscountHook is Ownable {
     constructor(IAttestationRegistry _iAttestationRegistry, address initialOwner) Ownable(initialOwner) {
         iAttestationRegistry = _iAttestationRegistry;
     }
+
+
+    function _withdrawHookFee(IVault vault,address recipient, Currency currency) internal returns (uint256 amount) {
+        amount = vault.balanceOf(address(this), currency);
+        if (amount == 0) {
+            return 0;
+        }
+        // recipient!= address(0)
+        require(recipient != address(0), "recipient cannot be zero address");
+        vault.burn(address(this), currency, amount);
+        vault.take(currency, recipient, amount);
+        emit FeesWithdrawn(recipient, currency, amount);
+    }
+
+
+    function getBalance(IVault vault,address recipient, Currency currency) external onlyOwner returns (uint256 amount) {
+        amount = vault.balanceOf(address(this), currency);
+        if (amount == 0) {
+            return 0;
+        }
+        return amount;
+    }
+
 
     function getFeeDiscount(address sender, PoolKey memory poolKey) internal view returns (uint24) {
         uint24 poolFee = poolFeeMapping[poolKey.toId()];
@@ -113,7 +144,7 @@ abstract contract BaseFeeDiscountHook is Ownable {
             // Ensure attestation has a valid timestamp field
             if (
                 (block.timestamp - attestation.timestamp / 1000) <= durationOfAttestation * 24 * 60 * 60
-                    && attestation.value >= baseValue
+                && attestation.value >= baseValue
             ) {
                 return true;
             }
