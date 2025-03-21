@@ -54,10 +54,10 @@ contract BinExchangeVolumeHook is BinBaseHook, BaseFeeDiscountHook {
     poolManagerOnly
     returns (bytes4)
     {
-        //TODO add event for PoolKey
         poolManager.updateDynamicLPFee(key, defaultFee);
         poolFeeMapping[key.toId()] = defaultFee;
         poolsInitialized.push(key.toId());
+        emit PoolInitialize(sender, key.toId(), key.currency0, key.currency1);
         return (this.afterInitialize.selector);
     }
 
@@ -77,23 +77,33 @@ contract BinExchangeVolumeHook is BinBaseHook, BaseFeeDiscountHook {
     poolManagerOnly
     returns (bytes4, int128)
     {
+        HookFeeConfiguration memory hookFeeConfiguration = hookFeeConfigurations[key.toId()];
+        if (!hookFeeConfiguration.enabled) {
+            return (this.afterSwap.selector, 0);
+        }
+        uint128 hookFee =
+            hookFeeConfiguration.fee == 0 ? defaultHookFee : hookFeeConfiguration.fee;
+        if (hookFee == 0) {
+            return (this.afterSwap.selector, 0);
+        }
+        //bool specifiedTokenIs0 = (params.amountSpecified < 0 == params.zeroForOne);
+        bool specifiedTokenIs0 = (amountSpecified > 0 == swapForY);
+
         (Currency feeCurrency, int128 swapAmount) =
-            (swapForY) ? (key.currency1, amountSpecified) : (key.currency0, amountSpecified);
+            (specifiedTokenIs0) ? (key.currency1, delta.amount1()) : (key.currency0, delta.amount0());
         // if fee is on output, get the absolute output amount
-        if (swapAmount < 0) swapAmount = -swapAmount;
-        //TODO hookFee default 0.01% now
-        uint256 feeAmount = uint256(uint128(swapAmount)) * 1 / TOTAL_FEE_BIPS;
+        if (swapAmount < 0) swapAmount = - swapAmount;
+        uint256 feeAmount = uint256(uint128(swapAmount)) * hookFee / TOTAL_FEE_BIPS;
         vault.mint(address(this), feeCurrency, feeAmount);
         return (this.afterSwap.selector, feeAmount.toInt128());
     }
 
 
     function withdrawHookFee(address recipient, Currency currency) external onlyOwner {
-        vault.lock(abi.encodeCall(this.withdrawHookFeeCallBack, (vault,recipient, currency)));
+        vault.lock(abi.encodeCall(this.withdrawHookFeeCallBack, (vault, recipient, currency)));
     }
 
-
-        /*
+    /*
 @dev Update fee for pool by poolKey
       @param fee
       @return

@@ -8,6 +8,7 @@ import {CLPositionManager} from "pancake-v4-periphery/src/pool-cl/CLPositionMana
 import {UniversalRouter} from "pancake-v4-universal-router/src/UniversalRouter.sol";
 import {Constants} from "pancake-v4-core/test/pool-cl/helpers/Constants.sol";
 import {PoolKey} from "pancake-v4-core/src/types/PoolKey.sol";
+import {PoolId} from "pancake-v4-core/src/types/PoolId.sol";
 import {PoolIdLibrary} from "pancake-v4-core/src/types/PoolId.sol";
 import {IHooks} from "pancake-v4-core/src/interfaces/IHooks.sol";
 import {ICLRouterBase} from "pancake-v4-periphery/src/pool-cl/interfaces/ICLRouterBase.sol";
@@ -15,6 +16,7 @@ import {ICLRouterBase} from "pancake-v4-periphery/src/pool-cl/interfaces/ICLRout
 import {CLUtils} from "./utils/CLUtils.sol";
 import {console} from "forge-std/console.sol";
 import "forge-std/Script.sol";
+import {CLExchangeVolumeHook} from "../../src/pool-cl/volume/CLExchangeVolumeHook.sol";
 
 contract TestBase is Script, CLUtils {
     using PoolIdLibrary for PoolKey;
@@ -82,9 +84,20 @@ contract TestAddLiquidityScript is TestBase {
     }
 }
 
+contract TestSetHookFee is TestBase{
+    function _test() public override{
+        address _hook = vm.envAddress("CL_HOOK");
+        // id should set manual
+        PoolId poolId = PoolId.wrap(bytes32(hex"095e04f923c384fbd5af52bc48c927ccc66054417f5867c630b4cba928a3bee0"));
+        CLExchangeVolumeHook(_hook).setHookFeeEnabled(poolId, true);
+        CLExchangeVolumeHook(_hook).setHookFee(poolId, 10);
+    }
+}
+
+
 contract TestSwapScript is TestBase {
     function _test() public override {
-        MockERC20(Currency.unwrap(currency0)).mint(msg.sender, 0.01 ether);
+//        MockERC20(Currency.unwrap(currency0)).mint(msg.sender, 0.01 ether);
         exactInputSingle(
             ICLRouterBase.CLSwapExactInputSingleParams({
                 poolKey: key,

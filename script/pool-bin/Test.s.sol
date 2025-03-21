@@ -9,6 +9,7 @@ import {UniversalRouter} from "pancake-v4-universal-router/src/UniversalRouter.s
 import {Constants} from "pancake-v4-core/test/pool-cl/helpers/Constants.sol";
 import {PoolKey} from "pancake-v4-core/src/types/PoolKey.sol";
 import {PoolIdLibrary} from "pancake-v4-core/src/types/PoolId.sol";
+import {PoolId} from "pancake-v4-core/src/types/PoolId.sol";
 import {IHooks} from "pancake-v4-core/src/interfaces/IHooks.sol";
 import {IBinRouterBase} from "pancake-v4-periphery/src/pool-bin/interfaces/IBinRouterBase.sol";
 
@@ -16,6 +17,7 @@ import {BinUtils} from "./utils/BinUtils.sol";
 import {console} from "forge-std/console.sol";
 import "forge-std/Script.sol";
 import {BinPoolManager} from "pancake-v4-core/src/pool-bin/BinPoolManager.sol";
+import {BinExchangeVolumeHook} from "../../src/pool-bin/volume/BinExchangeVolumeHook.sol";
 
 contract TestBase is Script, BinUtils {
     using PoolIdLibrary for PoolKey;
@@ -83,9 +85,19 @@ contract TestAddLiquidityScript is TestBase {
     }
 }
 
+contract TestSetHookFee is TestBase{
+    function _test() public override{
+        address _hook = vm.envAddress("BIN_HOOK");
+        // id should set manual
+        PoolId poolId = PoolId.wrap(bytes32(hex"103be6854baf1f2cb8f8fd0b43eb9ae4b6045988fa4dbca8310778d8a4709832"));
+        BinExchangeVolumeHook(_hook).setHookFeeEnabled(poolId, true);
+        BinExchangeVolumeHook(_hook).setHookFee(poolId, 10);
+    }
+}
+
 contract TestSwapScript is TestBase {
     function _test() public override {
-        MockERC20(Currency.unwrap(currency0)).mint(msg.sender, 0.01 ether);
+//        MockERC20(Currency.unwrap(currency0)).mint(msg.sender, 0.01 ether);
         exactInputSingle(
             IBinRouterBase.BinSwapExactInputSingleParams({
                 poolKey: key,

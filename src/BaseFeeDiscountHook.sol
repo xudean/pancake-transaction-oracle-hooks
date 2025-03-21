@@ -13,17 +13,31 @@ import {Currency} from "pancake-v4-core/src/types/Currency.sol";
 
 
 abstract contract BaseFeeDiscountHook is Ownable {
+
+    struct HookFeeConfiguration {
+        /// @dev fee switch
+        bool enabled;
+        /// @dev 100 means 1%
+        uint128 fee;
+    }
+
     using LPFeeLibrary for uint24;
 
     event BeforeAddLiquidity(address indexed sender);
     event BeforeSwap(address indexed sender);
+    event FeeToggled(PoolId id, bool enabled);
     event FeesWithdrawn(address indexed recipient, Currency indexed currency, uint256 amount);
+    event PoolInitialize(address indexed sender, PoolId indexed id, Currency currency0, Currency currency1);
 
     error Unauthorized(address caller);
+    error FeeExceedsCap(uint256 fee);
 
+    event FeeUpdated(PoolId id, uint256 fee);
 
     /// @notice The max possible fee charged for each swap in bips (10000bp = 100%).
     uint128 public constant TOTAL_FEE_BIPS = 10_000;
+    uint128 public defaultHookFee = 0;
+    uint128 public constant HOOK_FEE_CAP = 100;
 
     event DefaultFeeChanged(uint24 oldFee, uint24 newFee);
     event BaseValueChanged(uint24 oldBaseValue, uint24 newBaseValue);
@@ -43,24 +57,64 @@ abstract contract BaseFeeDiscountHook is Ownable {
     // AttestationRegistry
     IAttestationRegistry public iAttestationRegistry;
 
+    /// @notice Fee configuration for each pool
+    mapping(PoolId pool => HookFeeConfiguration hookFeeConfiguration) public hookFeeConfigurations;
+
+
     constructor(IAttestationRegistry _iAttestationRegistry, address initialOwner) Ownable(initialOwner) {
         iAttestationRegistry = _iAttestationRegistry;
     }
 
+    function getHookPoolEnableFee(PoolId id) public view returns(bool){
+        return hookFeeConfigurations[id].enabled;
+    }
 
+    function getHookPoolFee(PoolId id) public view returns(uint128){
+        return hookFeeConfigurations[id].fee;
+    }
+
+
+    /// @notice Set default pool fee
+    function setDefaultHookFee(uint128 fee) external onlyOwner {
+        defaultHookFee = fee;
+    }
+
+
+    /// @notice Withdraw hook fee
     function withdrawHookFeeCallBack(IVault vault, address recipient, Currency currency) external {
         if (msg.sender != address(this)) {
             revert Unauthorized(msg.sender);
         }
         uint256 amount = vault.balanceOf(address(this), currency);
-        if (amount == 0) {
-            return 0;
+        if (amount != 0) {
+            // recipient!= address(0)
+            require(recipient != address(0), "recipient cannot be zero address");
+            vault.burn(address(this), currency, amount);
+            vault.take(currency, recipient, amount);
+            emit FeesWithdrawn(recipient, currency, amount);
         }
-        // recipient!= address(0)
-        require(recipient != address(0), "recipient cannot be zero address");
-        vault.burn(address(this), currency, amount);
-        vault.take(currency, recipient, amount);
-        emit FeesWithdrawn(recipient, currency, amount);
+    }
+
+    /// @notice Set hook fee enabled for PoolId
+    function setHookFeeEnabled(PoolId id, bool enabled) external onlyOwner {
+        if (hookFeeConfigurations[id].enabled == enabled) {
+            return;
+        }
+        hookFeeConfigurations[id].enabled = enabled;
+        emit FeeToggled(id, enabled);
+    }
+
+
+    /// @notice Set hook fee for PoolId
+    function setHookFee(PoolId id, uint128 hookFee) external onlyOwner {
+        if (hookFee > HOOK_FEE_CAP) {
+            revert FeeExceedsCap(hookFee);
+        }
+        if (hookFeeConfigurations[id].fee == hookFee) {
+            return;
+        }
+        hookFeeConfigurations[id].fee = hookFee;
+        emit FeeUpdated(id, hookFee);
     }
 
 
