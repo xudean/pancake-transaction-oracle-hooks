@@ -372,7 +372,7 @@ contract AttestationRegistryTest is Test {
         registry.submitAttestation{value: submissionFee}(attestation);
     }
 
-    function testFailSubmitAttestationInsufficientFee() public {
+    function testSubmitAttestationInsufficientFee() public {
         AttNetworkRequest memory request = AttNetworkRequest({
             url: "https://www.okx.com/v3/users/fee/trading-volume-progress?t=1736757319823",
             header: "",
@@ -400,7 +400,9 @@ contract AttestationRegistryTest is Test {
         });
 
         vm.deal(address(this), 1 ether);
+        vm.expectRevert("Insufficient fee");
         registry.submitAttestation{value: submissionFee - 1}(attestation);
+       
     }
 
     function testGetAttestationByRecipient() public {
