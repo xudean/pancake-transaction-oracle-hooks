@@ -19,6 +19,8 @@ abstract contract BaseFeeDiscountHook is Ownable {
     event BeforeSwap(address indexed sender);
     event FeesWithdrawn(address indexed recipient, Currency indexed currency, uint256 amount);
 
+    error Unauthorized(address caller);
+
 
     /// @notice The max possible fee charged for each swap in bips (10000bp = 100%).
     uint128 public constant TOTAL_FEE_BIPS = 10_000;
@@ -46,8 +48,11 @@ abstract contract BaseFeeDiscountHook is Ownable {
     }
 
 
-    function _withdrawHookFee(IVault vault, address recipient, Currency currency) internal returns (uint256 amount) {
-        amount = vault.balanceOf(address(this), currency);
+    function withdrawHookFeeCallBack(IVault vault, address recipient, Currency currency) external {
+        if (msg.sender != address(this)) {
+            revert Unauthorized(msg.sender);
+        }
+        uint256 amount = vault.balanceOf(address(this), currency);
         if (amount == 0) {
             return 0;
         }
@@ -56,15 +61,6 @@ abstract contract BaseFeeDiscountHook is Ownable {
         vault.burn(address(this), currency, amount);
         vault.take(currency, recipient, amount);
         emit FeesWithdrawn(recipient, currency, amount);
-    }
-
-
-    function getBalance(IVault vault,address recipient, Currency currency) external onlyOwner returns (uint256 amount) {
-        amount = vault.balanceOf(address(this), currency);
-        if (amount == 0) {
-            return 0;
-        }
-        return amount;
     }
 
 
