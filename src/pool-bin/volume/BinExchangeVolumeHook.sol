@@ -1,4 +1,4 @@
-pragma solidity ^0.8.24;
+pragma solidity 0.8.26;
 
 import "../../BaseFeeDiscountHook.sol";
 import "pancake-v4-core/src/pool-cl/interfaces/ICLHooks.sol";

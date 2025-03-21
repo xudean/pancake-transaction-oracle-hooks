@@ -1,15 +1,12 @@
-# pancake-transaction-oracle-hooks
+# CEX Trading Hooks For PancakeSwap V4
 
 ## Overview
 
-This repo creates a simple demo for DEX exclusive-access pools and better filters qualified users by combining off-chain and on-chain transaction data verification. This combination provides a more accurate representation of user transaction activities in a privacy-preserving way, giving applications more flexible filtering criteria. In the PancakeSwap case, a suitable exclusive-access condition could be if a user has a 30-day spot transaction volume exceeding $100000 on a CEX platform and has made an on-chain transaction on the BNB Chain, making this user a target user for DEX.
+This repository provides a simple demo for PancakeSwap v4, allowing users to verify their 30-day CEX spot trading volume to qualify for a swap fee discount. If a user verifies and submits a successful 30-day CEX trading volume exceeding the threshold of 10k to the BNB Chain, the hook contract will validate the information. When the user performs a swap on PancakeSwap, the contract will apply a fee discount—currently set at 50%—once the conditions are confirmed to be met.
 
-In this demo, transaction proofs can be submitted from the Primus extension or utilized by Primus's zkTLS SDK to attest the user's on-chain and off-chain transactions. Throughout the entire process, the user’s privacy is fully protected. Whether the user meets the exclusive-access demands could be verified by this hook contract. 
+The user can generate a CEX trading proof through an external [link](https://pancakeswapv4-hook.primuslabs.xyz/) on the Swap page, which redirects them to a dApp page utilizing the [Primus zkTLS capability](https://docs.primuslabs.xyz/data-verification/tech-intro) to complete the data verification process. Throughout the entire process, the user’s privacy is fully protected.
 
-For off-chain transaction proof, [Primus's](https://primuslabs.xyz/) zkTLS and IZK techniques are used to verify whether the user’s 30-day spot transaction volume on CEX platforms, such as Binance or OKX, exceeds $100000 or a specific amount, depending on the application’s requirements.
-
-
-![image](./docs/pics/process.jpeg)
+![image](./docs/pics/pancake-hook-process.png)
 
 
 ## Prerequisite
@@ -47,7 +44,7 @@ The [BinExchangeVolumeHook](src/pool-bin/volume/BinExchangeVolumeHook.sol) imple
 
 [BinExchangeVolumeHook Contract](./docs/src/src/pool-bin/volume/BinExchangeVolumeHook.sol/contract.BinExchangeVolumeHook.md)
 
-## BSC-Testnet
+## BNBChain-Testnet
 
 ### Configurations
 
@@ -116,7 +113,7 @@ Add/replace the above address in `.env`.
 
 ```sh
 source .env
-forge script script/pool-cl/Test.s.sol:TestInitializeScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+forge script script/pool-cl/Test.s.sol:TestInitializeScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --gas-estimate-multiplier 600 --broadcast
 ```
 
 This command only needs to be executed once.

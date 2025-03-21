@@ -1,5 +1,5 @@
 # CLExchangeVolumeHook
-[Git Source](https://github.com/WuEcho/pancake-transaction-oracle-hooks/blob/feca97195ce7999ef87419eab15c366c609ecf4a/src/pool-cl/volume/CLExchangeVolumeHook.sol)
+[Git Source](https://github.com/WuEcho/pancake-transaction-oracle-hooks/blob/d25cacf462cd44cfa2b91ac015aa755b33e6c616/src/pool-cl/volume/CLExchangeVolumeHook.sol)
 
 **Inherits:**
 [CLBaseHook](/src/pool-cl/CLBaseHook.sol/abstract.CLBaseHook.md), [BaseFeeDiscountHook](/src/BaseFeeDiscountHook.sol/abstract.BaseFeeDiscountHook.md)
@@ -26,16 +26,15 @@ constructor(ICLPoolManager _poolManager, IAttestationRegistry _attestationRegist
 function getHooksRegistrationBitmap() external pure override returns (uint16);
 ```
 
-### beforeAddLiquidity
+### afterInitialize
 
 
 ```solidity
-function beforeAddLiquidity(
-    address sender,
-    PoolKey calldata key,
-    ICLPoolManager.ModifyLiquidityParams calldata,
-    bytes calldata
-) external override poolManagerOnly returns (bytes4);
+function afterInitialize(address sender, PoolKey calldata key, uint160 sqrtPriceX96, int24 tick)
+    external
+    override
+    poolManagerOnly
+    returns (bytes4);
 ```
 
 ### beforeSwap
@@ -49,10 +48,17 @@ function beforeSwap(address sender, PoolKey calldata key, ICLPoolManager.SwapPar
     returns (bytes4, BeforeSwapDelta, uint24);
 ```
 
-### getAttestationRegistry
+### updatePoolFeeByPoolKey
 
 
 ```solidity
-function getAttestationRegistry() external view returns (IAttestationRegistry);
+function updatePoolFeeByPoolKey(PoolKey memory poolKey, uint24 newBaseFee) external onlyOwner;
+```
+
+### updatePoolFeeByPoolId
+
+
+```solidity
+function updatePoolFeeByPoolId(PoolId[] memory poolIds, uint24 newBaseFee) external onlyOwner;
 ```
 

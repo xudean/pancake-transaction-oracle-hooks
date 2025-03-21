@@ -1,5 +1,5 @@
 # BaseFeeDiscountHook
-[Git Source](https://github.com/WuEcho/pancake-transaction-oracle-hooks/blob/feca97195ce7999ef87419eab15c366c609ecf4a/src/BaseFeeDiscountHook.sol)
+[Git Source](https://github.com/WuEcho/pancake-transaction-oracle-hooks/blob/d25cacf462cd44cfa2b91ac015aa755b33e6c616/src/BaseFeeDiscountHook.sol)
 
 **Inherits:**
 Ownable
@@ -9,21 +9,42 @@ Ownable
 ### defaultFee
 
 ```solidity
-uint24 private defaultFee = 3000;
+uint24 public defaultFee = 3000;
 ```
 
 
 ### baseValue
 
 ```solidity
-uint24 private baseValue = 10000;
+uint24 public baseValue = 10000;
+```
+
+
+### durationOfAttestation
+
+```solidity
+uint24 public durationOfAttestation = 7;
+```
+
+
+### poolsInitialized
+
+```solidity
+PoolId[] public poolsInitialized;
+```
+
+
+### poolFeeMapping
+
+```solidity
+mapping(PoolId => uint24) public poolFeeMapping;
 ```
 
 
 ### iAttestationRegistry
 
 ```solidity
-IAttestationRegistry internal iAttestationRegistry;
+IAttestationRegistry public iAttestationRegistry;
 ```
 
 
@@ -49,13 +70,6 @@ function getFeeDiscount(address sender, PoolKey memory poolKey) internal view re
 function setDefaultFee(uint24 fee) external onlyOwner;
 ```
 
-### getDefaultFee
-
-
-```solidity
-function getDefaultFee() external view returns (uint24);
-```
-
 ### setBaseValue
 
 
@@ -63,11 +77,25 @@ function getDefaultFee() external view returns (uint24);
 function setBaseValue(uint24 _baseValue) external onlyOwner;
 ```
 
-### getBaseValue
+### setDurationOfAttestation
 
 
 ```solidity
-function getBaseValue() external view returns (uint24);
+function setDurationOfAttestation(uint24 _durationOfAttestation) external onlyOwner;
+```
+
+### setAttestationRegistry
+
+
+```solidity
+function setAttestationRegistry(IAttestationRegistry _iAttestationRegistry) external onlyOwner;
+```
+
+### getInitializedPoolSize
+
+
+```solidity
+function getInitializedPoolSize() external view returns (uint256);
 ```
 
 ### _checkAttestations
